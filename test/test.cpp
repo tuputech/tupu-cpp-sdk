@@ -1,13 +1,22 @@
-# TUPU C++ SDK
+/******************************************************************************
+ * TUPU Recognition API SDK
+ * Copyright(c)2013-2016, TUPU Technology
+ * http://www.tuputech.com
+ *****************************************************************************/
 
-SDK for TUPU visual recognition service
-######  
-<https://www.tuputech.com>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <sys/stat.h>
+#include <vector>
 
+#include "Base64.hpp"
+#include "Recognition.hpp"
 
-## Example
+using namespace std;
+using namespace TUPU;
 
-```
+int main(int argc, char *argv[]) {
     Recognition *rec = new Recognition("Path-of-Your-PKCS8-Private-Key");
 
     vector<string> images = {
@@ -26,23 +35,13 @@ SDK for TUPU visual recognition service
     cout << "- Perform returns: " << rc << endl;
     cout << "- HTTP Status Code: " << statusCode << endl;
     cout << "- Result: " << endl << result << endl;
-```
 
-## perform
+    delete rec;
 
-Perform a synchronous API call
+    return 0;
+}
 
-### Parameters
-- **secretId**: user's secret-id for accessing the API
-- **result**: recognition result in JSON string from server
-- **statusCode**: status code of response
-- **images**: list of image URLs or Paths (path starts with '@')
-- **tags**: list of tags for images (optional)
 
-### Return Values
 
-Returns OPC_OK on success.
 
-## License
 
-[MIT](http://www.opensource.org/licenses/mit-license.php)
