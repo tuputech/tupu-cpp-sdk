@@ -14,8 +14,10 @@ SDK for TUPU visual recognition service
 
 ## Building
 
-##### $ cmake .
-##### $ make
+```
+    $ cmake .
+    $ make
+```
 
 #### Output
 
