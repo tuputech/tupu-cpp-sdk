@@ -5,6 +5,23 @@ SDK for TUPU visual recognition service
 <https://www.tuputech.com>
 
 
+## Requirements
+
+- openssl & openssl-devel (openssl-dev)
+- libcurl & libcurl-devel (libcurl-dev)
+- cmake
+
+
+## Building
+
+\$ cmake .
+\$ make
+
+#### Output
+
+- lib/libtupu.a
+- lib/libtupu.so
+
 ## Example
 
 ```
@@ -28,18 +45,18 @@ SDK for TUPU visual recognition service
     cout << "- Result: " << endl << result << endl;
 ```
 
-## perform
+## Method perform
 
 Perform a synchronous API call
 
-### Parameters
+#### Parameters
 - **secretId**: user's secret-id for accessing the API
 - **result**: recognition result in JSON string from server
 - **statusCode**: status code of response
 - **images**: list of image URLs or Paths (path starts with '@')
 - **tags**: list of tags for images (optional)
 
-### Return Values
+#### Return Values
 
 Returns OPC_OK on success.
 
