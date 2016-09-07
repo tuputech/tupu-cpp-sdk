@@ -22,6 +22,7 @@
 
 #include "jsmn.h"
 #include "Base64.hpp"
+#include "TImage.hpp"
 #include "Recognition.hpp"
 
 
@@ -52,9 +53,9 @@ static int verify_with_sha256(const string & message, const string & signature, 
 static void random_str(size_t len, char *output);
 static void parse_json_value(const char *src, size_t len, string & result);
 static size_t write_memory(void *contents, size_t size, size_t nmemb, void *userp);
-static void compose_form(struct curl_httppost ** post,
-    const string & timestamp, const string & nonce, const string & signature,
-    const vector<string> & images, const vector<string> & tags);
+static void compose_form(struct curl_httppost ** post, const vector<TImage> & images,
+    const string & timestamp, const string & nonce,
+    const string & signature, const string & uid);
 #if VERB_LEV >= 2
 static int debug_trace(CURL *curl, curl_infotype type, char *data, size_t size, void *userptr);
 #endif
@@ -97,14 +98,41 @@ void Recognition::generalInit(const string & rsaPrivateKeyPath)
 }
 
 
-void Recognition::setUserAgent(const std::string & ua)
+OpCode Recognition::perform(const string & secretId, string & result, long *statusCode,
+    const vector<string> & images, const vector<string> & tags)
 {
-    m_ua = ua;
+    vector<TImage> imgList;
+
+    unsigned int i = 0;
+    const char * tag = NULL;
+    while (i < images.size())
+    {
+        TImage image;
+
+        const char* img = images[i].c_str();
+        //Upload file with local path, and trim starting symbol '@''
+        if (img[0] == '@') {
+            image.setPath(img+1);
+        } else {
+            image.setURL(img);
+        }
+
+        if (i < tags.size() && !tags[i].empty())
+            tag = tags[i].c_str();
+        if (tag)
+            image.setTag(tag);
+
+        imgList.push_back(image);
+
+        i++;
+    }
+
+    return perform(secretId, imgList, result, statusCode);
 }
 
 
-OpCode Recognition::perform(const string & secretId, string & result, long *statusCode,
-    const vector<string> & images, const vector<string> & tags)
+OpCode Recognition::perform(const string & secretId, const vector<TImage> & images,
+    string & result, long *statusCode)
 {
     if (secretId.size() <=0 || images.size() <= 0)
         return OPC_WRONGPARAM;
@@ -129,14 +157,15 @@ OpCode Recognition::perform(const string & secretId, string & result, long *stat
     }
 
     struct curl_httppost *formpost = NULL;
-    compose_form(&formpost, tsBuf, nonce, signature, images, tags);
+    compose_form(&formpost, images, tsBuf, nonce, signature, m_uid);
     if (NULL == formpost)
         return OPC_OTHERS;
-    
-    opc = this->sendRequest(secretId, formpost, result, statusCode);
+
+    opc = sendRequest(secretId, formpost, result, statusCode);
     curl_formfree(formpost);
     return opc;
 }
+
 
 OpCode Recognition::sendRequest(const string & secretId, struct curl_httppost *post,
     string & result, long *statusCode)
@@ -179,6 +208,7 @@ OpCode Recognition::sendRequest(const string & secretId, struct curl_httppost *p
 #endif
 
     res = curl_easy_perform(curl);
+
     long httpcode = 0;
     curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &httpcode);
     if (res != CURLE_OK) {
@@ -186,7 +216,7 @@ OpCode Recognition::sendRequest(const string & secretId, struct curl_httppost *p
         opc = OPC_SENDFAILED;
     }
     else if (httpcode >= 200 && httpcode < 300) {
-        opc = this->handleResponse(chunk.memory, chunk.size, result);
+        opc = handleResponse(chunk.memory, chunk.size, result);
     }
     else {
         opc = OPC_REQFAILED;
@@ -419,9 +449,9 @@ size_t write_memory(void *contents, size_t size, size_t nmemb, void *userp)
 }
 
 static
-void compose_form(struct curl_httppost ** post,
-    const string & timestamp, const string & nonce, const string & signature,
-    const vector<string> & images, const vector<string> & tags)
+void compose_form(struct curl_httppost ** post, const vector<TImage> & images,
+    const string & timestamp, const string & nonce,
+    const string & signature, const string & uid)
 {
     struct curl_httppost* last = NULL;
     curl_formadd(post, &last,
@@ -437,38 +467,51 @@ void compose_form(struct curl_httppost ** post,
                CURLFORM_COPYCONTENTS, signature.c_str(),
                CURLFORM_END);
 
+    if (!uid.empty()) {
+        curl_formadd(post, &last,
+                   CURLFORM_COPYNAME, "uid",
+                   CURLFORM_COPYCONTENTS, uid.c_str(),
+                   CURLFORM_END);
+    }
+
     unsigned int i = 0;
-    const char * tag = NULL;
     do
     {
-        const char* img = images[i].c_str();
-        if (img[0] == '@')
+        struct curl_httppost* prev = last;
+        const TImage & img = images[i];
+        if (!img.path().empty())
         {
             //Upload file with file path
-            img++; //trim starting symbol '@''
             curl_formadd(post, &last,
                CURLFORM_COPYNAME, "image",
-               //CURLFORM_FILENAME, "xxx",
-               //CURLFORM_CONTENTTYPE, "application/octet-stream",
-               CURLFORM_FILE, img,
+               CURLFORM_FILE, img.path().c_str(),
                CURLFORM_END);
         }
-        else
+        else if (!img.url().empty())
         {
             //File URL
             curl_formadd(post, &last,
                CURLFORM_COPYNAME, "image",
-               CURLFORM_COPYCONTENTS, img,
+               CURLFORM_COPYCONTENTS, img.url().c_str(),
                CURLFORM_END);
         }
+        else if (img.buffer())
+        {
+            //CURLFORM_CONTENTTYPE, "application/octet-stream",
+            /* Add a buffer to upload */
+            curl_formadd(post, &last,
+                CURLFORM_COPYNAME, "image",
+                CURLFORM_BUFFER, img.filename().c_str(),
+                CURLFORM_BUFFERPTR, img.buffer(),
+                CURLFORM_BUFFERLENGTH, img.bufferLength(),
+                CURLFORM_END);
+        }
 
-        if (i < tags.size())
-            tag = tags[i].c_str();
-        if (NULL != tag) {
-            //Set tag for the image
+        if (prev != last && !img.tag().empty())
+        {
             curl_formadd(post, &last,
                CURLFORM_COPYNAME, "tag",
-               CURLFORM_COPYCONTENTS, tag,
+               CURLFORM_COPYCONTENTS, img.tag().c_str(),
                CURLFORM_END);
         }
     } while (++i < images.size());

@@ -10,6 +10,7 @@
 namespace TUPU
 {
 
+class TImage;
 typedef struct rsa_st RSA;
 
 typedef enum {
@@ -31,6 +32,15 @@ class Recognition
         virtual ~Recognition();
 
     public:
+        //Set uid post paremeter to identify sub-users
+        void setUID(const std::string & uid) { m_uid = uid; }
+        //Set user-agent of request(s)
+        void setUserAgent(const std::string & ua) { m_ua = ua; }
+
+    public:
+        OpCode perform(const std::string & secretId, const std::vector<TImage> & images,
+            std::string & result, long *statusCode);
+
 #if __cplusplus >= 201103L
         OpCode perform(const std::string & secretId,
             std::string & result, long *statusCode,
@@ -43,8 +53,6 @@ class Recognition
             const std::vector<std::string> & tags = std::vector<std::string>() );
 #endif
 
-        void setUserAgent(const std::string & ua);
-
     private:
         void generalInit(const std::string & rsaPrivateKeyPath);
         OpCode sendRequest(const std::string & secretId, struct curl_httppost *post,
@@ -55,8 +63,9 @@ class Recognition
         RSA * m_rsaPrivateKey;
         RSA * m_tupuPublicKey;
         std::string m_apiUrl;
+        std::string m_uid;
         std::string m_ua;
-}; //namespace Client
+}; //Class Recognition
 
 } //namespace TUPU
 

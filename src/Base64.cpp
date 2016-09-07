@@ -69,7 +69,7 @@ int TUPU::base64_decode(const string & ascdata, void **buf_ptr, size_t *but_len)
     BIO *bmem, *b64;
 
     size_t input_len = ascdata.size() + 1;
-    char input[input_len];
+    char *input = (char *)malloc(input_len);
     memset(input, 0, input_len);
     strcpy(input, ascdata.c_str());
 
@@ -93,6 +93,8 @@ int TUPU::base64_decode(const string & ascdata, void **buf_ptr, size_t *but_len)
 
     *buf_ptr = buffer;
     *but_len = length;
+
+    free(input);
 
     return 0;
 }

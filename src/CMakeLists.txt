@@ -5,7 +5,7 @@
 ###############################################################################
 
 
-set(LIB_SRCS Base64.cpp Recognition.cpp jsmn.c) 
+set(LIB_SRCS Base64.cpp TImage.cpp Recognition.cpp jsmn.c) 
 
 add_library(tupu SHARED ${LIB_SRCS}) 
 
