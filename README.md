@@ -113,7 +113,13 @@ Perform a synchronous API call
 
 **NOTE: This method can be called multiple times simultaneously, and it's recommended to use ONE SINGLE Recognition object for multiple threads.**
 
-#### Parameters
+#### Parameters of entry 1
+- **secretId**: user's secret-id for accessing the API
+- **images**: list of TImage objects
+- **result**: recognition result in JSON string from server
+- **statusCode**: status code of response
+
+#### Parameters of entry 2
 - **secretId**: user's secret-id for accessing the API
 - **result**: recognition result in JSON string from server
 - **statusCode**: status code of response
