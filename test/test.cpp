@@ -29,12 +29,11 @@ int main(int argc, char *argv[]) {
     //rec->setUID("user-bucket-xyz");
 
     string imgUrl = "http://www.yourdomain.com/img/1.jpg"
-    string imgPath = "@/home/user/img/2.jpg"
+    string imgPath1 = "@/home/user/img/1.jpg"
+    string imgPath2 = "@/home/user/img/2.jpg"
 
-    vector<string> images = {
-        imgUrl //providing a remote url of image
-        , "@" + imgPath //providing a local file path to upload
-    };
+    vector<string> images1 = { imgUrl };
+    vector<string> images2 = { "@" + imgPath1, "@" + imgPath2 };
     vector<string> tags = {"Funny"}; //number of tags may be less than number of images
 
     string result;
@@ -42,21 +41,21 @@ int main(int argc, char *argv[]) {
     OpCode rc = OPC_OK;
     string secretId = "your_secret_id"
 
-    //Providing URLs or paths of images with tags
-    rc = rec->perform(secretId, result, &statusCode, images, tags);
+    //Providing URLs of images with tags (optional)
+    rc = rec->perform(secretId, result, &statusCode, images1, tags);
     printResult(rc, statusCode, result);
 
-    //Ingore tags of images
-    rc = rec->perform(secretId, result, &statusCode, images);
+    //Providing paths of images without tags (optional)
+    rc = rec->perform(secretId, result, &statusCode, images2);
     printResult(rc, statusCode, result);
 
-    //Providing image binary and URL
-    vector<TImage> timages;
-    loadImage(timages, imgPath.c_str(), "Amazing");
+    //Providing image binary and path
+    vector<TImage> images3;
+    loadImage(images3, imgPath2.c_str(), "Amazing");
     TImage timg;
-    timg.setURL(imgUrl);
-    timages.push_back(timg);
-    rc = rec->perform(secretId, timages, result, &statusCode);
+    timg.setPath(imgPath1);
+    images3.push_back(timg);
+    rc = rec->perform(secretId, images3, result, &statusCode);
     printResult(rc, statusCode, result);
 
     delete rec;

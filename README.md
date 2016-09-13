@@ -5,6 +5,8 @@ SDK for TUPU visual recognition service
 <https://www.tuputech.com>
 
 ## Changelogs
+#### v1.2
+- Correct examples for not mixing url and path in one request
 #### v1.1
 - Supporting binary image data
 - Add uid parameter 
@@ -111,7 +113,9 @@ void printResult(OpCode rc, long statusCode, const string & result)
 
 Perform a synchronous API call
 
-**NOTE: This method can be called multiple times simultaneously, and it's recommended to use ONE SINGLE Recognition object for multiple threads.**
+### NOTE:
+- This method can be called multiple times simultaneously, and it's recommended to use ONE SINGLE Recognition object for multiple threads.
+- Please use only URLs or paths in ONE request
 
 #### Parameters of Entry 1
 - **secretId**: user's secret-id for accessing the API
