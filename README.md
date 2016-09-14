@@ -7,8 +7,10 @@ SDK for TUPU visual recognition service
 ## Changelogs
 #### v1.2.1
 - Update usage and example
+
 #### v1.2
 - Correct examples for not mixing url and path in one request
+
 #### v1.1
 - Supporting binary image data
 - Add uid parameter 
