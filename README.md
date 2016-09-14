@@ -5,6 +5,8 @@ SDK for TUPU visual recognition service
 <https://www.tuputech.com>
 
 ## Changelogs
+#### v1.2.1
+- Update usage and example
 #### v1.2
 - Correct examples for not mixing url and path in one request
 #### v1.1
@@ -34,40 +36,40 @@ SDK for TUPU visual recognition service
 
 ```
 int main(int argc, char *argv[]) {
+    string secretId = "your_secret_id"
     Recognition *rec = new Recognition("Path-of-Your-PKCS8-Private-Key");
 
     //Set sub-user identifier for billing and statistics (optional feature)
     //rec->setUID("user-bucket-xyz");
 
     string imgUrl = "http://www.yourdomain.com/img/1.jpg"
-    string imgPath = "@/home/user/img/2.jpg"
+    string imgPath1 = "@/home/user/img/1.jpg"
+    string imgPath2 = "@/home/user/img/2.jpg"
 
-    vector<string> images = {
-        imgUrl //providing a remote url of image
-        , "@" + imgPath //providing a local file path to upload
-    };
+    vector<string> images1 = { imgUrl };
+    vector<string> images2 = { "@" + imgPath1, "@" + imgPath2 };
     vector<string> tags = {"Funny"}; //number of tags may be less than number of images
 
     string result;
     long statusCode = 0;
     OpCode rc = OPC_OK;
-    string secretId = "your_secret_id"
 
-    //Providing URLs or paths of images with tags
-    rc = rec->perform(secretId, result, &statusCode, images, tags);
+    //Providing URLs of images with tags (optional)
+    rc = rec->perform(secretId, result, &statusCode, images1, tags);
     printResult(rc, statusCode, result);
 
-    //Ingore tags of images
-    rc = rec->perform(secretId, result, &statusCode, images);
+    //Providing paths of images without tags (optional)
+    rc = rec->perform(secretId, result, &statusCode, images2);
     printResult(rc, statusCode, result);
 
-    //Providing image binary and URL
-    vector<TImage> timages;
-    loadImage(timages, imgPath.c_str(), "Amazing");
+    //Providing image binary and path
+    vector<TImage> images3;
+    loadImage(images3, imgPath2.c_str(), "Room102");
     TImage timg;
-    timg.setURL(imgUrl);
-    timages.push_back(timg);
-    rc = rec->perform(secretId, timages, result, &statusCode);
+    timg.setPath(imgPath1);
+    timg.setTag("Room103");
+    images3.push_back(timg);
+    rc = rec->perform(secretId, images3, result, &statusCode);
     printResult(rc, statusCode, result);
 
     delete rec;
@@ -113,15 +115,17 @@ void printResult(OpCode rc, long statusCode, const string & result)
 
 Perform a synchronous API call
 
-### NOTE:
+### NOTES:
 - This method can be called multiple times simultaneously, and it's recommended to use ONE SINGLE Recognition object for multiple threads.
-- Please use only URLs or paths in ONE request
+- Please don't mix use of URLs or paths in ONE call
 
 #### Parameters of Entry 1
 - **secretId**: user's secret-id for accessing the API
 - **images**: list of TImage objects (used for URL, path or binary)
 - **result**: recognition result in JSON string from server
 - **statusCode**: status code of response
+
+**NOTE:** If using tags, make sure to set tag for all images
 
 #### Parameters of Entry 2
 - **secretId**: user's secret-id for accessing the API

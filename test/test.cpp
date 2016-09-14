@@ -23,6 +23,7 @@ void printResult(OpCode rc, long statusCode, const string & result);
 
 
 int main(int argc, char *argv[]) {
+    string secretId = "your_secret_id"
     Recognition *rec = new Recognition("Path-of-Your-PKCS8-Private-Key");
 
     //Set sub-user identifier for billing and statistics (optional feature)
@@ -39,7 +40,6 @@ int main(int argc, char *argv[]) {
     string result;
     long statusCode = 0;
     OpCode rc = OPC_OK;
-    string secretId = "your_secret_id"
 
     //Providing URLs of images with tags (optional)
     rc = rec->perform(secretId, result, &statusCode, images1, tags);
@@ -51,9 +51,10 @@ int main(int argc, char *argv[]) {
 
     //Providing image binary and path
     vector<TImage> images3;
-    loadImage(images3, imgPath2.c_str(), "Amazing");
+    loadImage(images3, imgPath2.c_str(), "Room102");
     TImage timg;
     timg.setPath(imgPath1);
+    timg.setTag("Room103");
     images3.push_back(timg);
     rc = rec->perform(secretId, images3, result, &statusCode);
     printResult(rc, statusCode, result);
