@@ -121,11 +121,9 @@ Perform a synchronous API call
 
 #### Parameters of Entry 1
 - **secretId**: user's secret-id for accessing the API
-- **images**: list of TImage objects (used for URL, path or binary)
+- **images**: list of TImage objects (used for URL, path or binary). If using tags, make sure to set tag for all images
 - **result**: recognition result in JSON string from server
 - **statusCode**: status code of response
-
-**NOTE:** If using tags, make sure to set tag for all images
 
 #### Parameters of Entry 2
 - **secretId**: user's secret-id for accessing the API
