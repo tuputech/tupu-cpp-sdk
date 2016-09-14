@@ -113,7 +113,7 @@ void printResult(OpCode rc, long statusCode, const string & result)
 }
 ```
 
-## Method perform
+## Recognition::perform
 
 Perform a synchronous API call
 
