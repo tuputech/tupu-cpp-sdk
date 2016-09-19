@@ -165,6 +165,7 @@ Perform a synchronous API call and functions like the other 2 performXXX, but it
 - **images**: list of TImage objects
 - **result**: recognition result in JSON string from server
 - **statusCode**: status code of response
+
 #### Return Values
 
 Returns OPC_OK on success.
