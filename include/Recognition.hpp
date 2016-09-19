@@ -38,20 +38,19 @@ class Recognition
         void setUserAgent(const std::string & ua) { m_ua = ua; }
 
     public:
+        OpCode performWithURL(const std::string & secretId,
+            std::string & result, long *statusCode,
+            const std::vector<std::string> & imageURLs,
+            const std::vector<std::string> & tags = std::vector<std::string>() );
+
+        OpCode performWithPath(const std::string & secretId,
+            std::string & result, long *statusCode,
+            const std::vector<std::string> & imagePaths,
+            const std::vector<std::string> & tags = std::vector<std::string>() );
+
+        //Don't mix the use of URL and path/binary
         OpCode perform(const std::string & secretId, const std::vector<TImage> & images,
             std::string & result, long *statusCode);
-
-#if __cplusplus >= 201103L
-        OpCode perform(const std::string & secretId,
-            std::string & result, long *statusCode,
-            const std::vector<std::string> & images,
-            const std::vector<std::string> & tags = {} );
-#else //c++98
-        OpCode perform(const std::string & secretId,
-            std::string & result, long *statusCode,
-            const std::vector<std::string> & images,
-            const std::vector<std::string> & tags = std::vector<std::string>() );
-#endif
 
     private:
         void generalInit(const std::string & rsaPrivateKeyPath);

@@ -45,11 +45,11 @@ int main(int argc, char *argv[]) {
     //rec->setUID("user-bucket-xyz");
 
     string imgUrl = "http://www.yourdomain.com/img/1.jpg"
-    string imgPath1 = "@/home/user/img/1.jpg"
-    string imgPath2 = "@/home/user/img/2.jpg"
+    string imgPath1 = "/home/user/img/1.jpg"
+    string imgPath2 = "/home/user/img/2.jpg"
 
     vector<string> images1 = { imgUrl };
-    vector<string> images2 = { "@" + imgPath1, "@" + imgPath2 };
+    vector<string> images2 = { imgPath1, imgPath2 };
     vector<string> tags = {"Funny"}; //number of tags may be less than number of images
 
     string result;
@@ -57,11 +57,11 @@ int main(int argc, char *argv[]) {
     OpCode rc = OPC_OK;
 
     //Providing URLs of images with tags (optional)
-    rc = rec->perform(secretId, result, &statusCode, images1, tags);
+    rc = rec->performWithURL(secretId, result, &statusCode, images1, tags);
     printResult(rc, statusCode, result);
 
     //Providing paths of images without tags (optional)
-    rc = rec->perform(secretId, result, &statusCode, images2);
+    rc = rec->performWithPath(secretId, result, &statusCode, images2);
     printResult(rc, statusCode, result);
 
     //Providing image binary and path
@@ -113,27 +113,55 @@ void printResult(OpCode rc, long statusCode, const string & result)
 }
 ```
 
-## Recognition::perform
+---------------
 
-Perform a synchronous API call
+## Recognition::performWithURL
 
-### NOTES:
-- This method can be called multiple times simultaneously, and it's recommended to use ONE SINGLE Recognition object for multiple threads.
-- Please don't mix use of URLs or paths in ONE call
+Perform a synchronous(blocking model) API call with URLs of images. This method can be called multiple times simultaneously.
 
-#### Parameters of Entry 1
-- **secretId**: user's secret-id for accessing the API
-- **images**: list of TImage objects (used for URL, path or binary). If using tags, make sure to set tag for all images
-- **result**: recognition result in JSON string from server
-- **statusCode**: status code of response
-
-#### Parameters of Entry 2
+#### Parameters
 - **secretId**: user's secret-id for accessing the API
 - **result**: recognition result in JSON string from server
 - **statusCode**: status code of response
-- **images**: list of image URLs or Paths (path starts with '@')
+- **imageURLs**: list of image URLs
 - **tags**: list of tags for images (optional)
 
+#### Return Values
+
+Returns OPC_OK on success.
+
+---------------
+
+## Recognition::performWithPath
+
+Perform a synchronous(blocking model) API call with local path of images. This method can be called multiple times simultaneously.
+
+#### Parameters
+- **secretId**: user's secret-id for accessing the API
+- **result**: recognition result in JSON string from server
+- **statusCode**: status code of response
+- **imagePaths**: list of image local paths
+- **tags**: list of tags for images (optional)
+
+#### Return Values
+
+Returns OPC_OK on success.
+
+---------------
+
+## Recognition::perform
+
+Perform a synchronous API call and functions like the other 2 performXXX, but it also supports image binary.
+
+### NOTES:
+- Please don't mix use of URL and path/binary in ONE call
+- If using tag, please set tag for all images
+
+#### Parameters
+- **secretId**: user's secret-id for accessing the API
+- **images**: list of TImage objects
+- **result**: recognition result in JSON string from server
+- **statusCode**: status code of response
 #### Return Values
 
 Returns OPC_OK on success.

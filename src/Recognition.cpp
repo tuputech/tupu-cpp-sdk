@@ -98,7 +98,7 @@ void Recognition::generalInit(const string & rsaPrivateKeyPath)
 }
 
 
-OpCode Recognition::perform(const string & secretId, string & result, long *statusCode,
+OpCode Recognition::performWithURL(const string & secretId, string & result, long *statusCode,
     const vector<string> & images, const vector<string> & tags)
 {
     vector<TImage> imgList;
@@ -108,14 +108,32 @@ OpCode Recognition::perform(const string & secretId, string & result, long *stat
     while (i < images.size())
     {
         TImage image;
+        image.setURL(images[i]);
 
-        const char* img = images[i].c_str();
-        //Upload file with local path, and trim starting symbol '@''
-        if (img[0] == '@') {
-            image.setPath(img+1);
-        } else {
-            image.setURL(img);
-        }
+        if (i < tags.size() && !tags[i].empty())
+            tag = tags[i].c_str();
+        if (tag)
+            image.setTag(tag);
+
+        imgList.push_back(image);
+
+        i++;
+    }
+
+    return perform(secretId, imgList, result, statusCode);
+}
+
+OpCode Recognition::performWithPath(const string & secretId, string & result, long *statusCode,
+    const vector<string> & images, const vector<string> & tags)
+{
+    vector<TImage> imgList;
+
+    unsigned int i = 0;
+    const char * tag = NULL;
+    while (i < images.size())
+    {
+        TImage image;
+        image.setPath(images[i]);
 
         if (i < tags.size() && !tags[i].empty())
             tag = tags[i].c_str();
