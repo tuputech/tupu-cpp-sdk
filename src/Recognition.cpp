@@ -33,6 +33,9 @@
 #define TUPU_API "http://api.open.tuputech.com/v3/recognition/"
 #define USER_AGENT "tupu-client/1.0"
 
+#define RND_LEN 3
+#define HEX_LEN RND_LEN * 2 + 1
+
 
 using namespace std;
 
@@ -156,9 +159,8 @@ OpCode Recognition::perform(const string & secretId, const vector<TImage> & imag
         return OPC_WRONGPARAM;
 
     OpCode opc = OPC_OK;
-    size_t len = 3, hexLen = len * 2 + 1;
-    char nonce[hexLen];
-    random_str(len, nonce);
+    char nonce[HEX_LEN];
+    random_str(RND_LEN, nonce);
 
     time_t ts = time(NULL);
     char tsBuf[30];
@@ -420,7 +422,7 @@ int verify_with_sha256(const string & message, const string & signature, RSA * p
 static
 void random_str(size_t len, char *output)
 {
-    unsigned char a[len];
+    unsigned char *a = (unsigned char*)malloc(len);
     if (RAND_bytes(a, len))
     {
         for (size_t i = 0; i < len; i++)
@@ -429,12 +431,13 @@ void random_str(size_t len, char *output)
         }
     
     }
+    free(a);
 }
 
 static
 void parse_json_value(const char *src, size_t len, string & result)
 {
-    char buf[len+1];
+    char *buf = (char*)malloc(len+1);
     memset(buf, 0, len+1);
     size_t j = 0;
     for (size_t i = 0; i < len; i++) {
@@ -443,6 +446,7 @@ void parse_json_value(const char *src, size_t len, string & result)
         buf[j++] = src[i];
     }
     result = string(buf);
+    free(buf);
 }
 
 static

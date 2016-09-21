@@ -5,6 +5,9 @@ SDK for TUPU visual recognition service
 <https://www.tuputech.com>
 
 ## Changelogs
+#### v1.2.3
+- Bug fixed
+
 #### v1.2.2
 - Update to distinguish methods for URL and path
 
