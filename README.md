@@ -5,6 +5,9 @@ SDK for TUPU visual recognition service
 <https://www.tuputech.com>
 
 ## Changelogs
+#### v1.2.4
+- Fixed test example syntax
+
 #### v1.2.3
 - Bug fixed
 
@@ -44,15 +47,15 @@ SDK for TUPU visual recognition service
 
 ```
 int main(int argc, char *argv[]) {
-    string secretId = "your_secret_id"
+    string secretId = "your_secret_id";
     Recognition *rec = new Recognition("Path-of-Your-PKCS8-Private-Key");
 
     //Set sub-user identifier for billing and statistics (optional feature)
     //rec->setUID("user-bucket-xyz");
 
-    string imgUrl = "http://www.yourdomain.com/img/1.jpg"
-    string imgPath1 = "/home/user/img/1.jpg"
-    string imgPath2 = "/home/user/img/2.jpg"
+    string imgUrl = "http://www.yourdomain.com/img/1.jpg";
+    string imgPath1 = "/home/user/img/1.jpg";
+    string imgPath2 = "/home/user/img/2.jpg";
 
     vector<string> images1 = { imgUrl };
     vector<string> images2 = { imgPath1, imgPath2 };
