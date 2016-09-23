@@ -301,22 +301,34 @@ OpCode Recognition::handleResponse(const char * resp, size_t resp_len, string & 
 static
 RSA * read_private_key(const string & key_path)
 {
+    BIO *bio = NULL;
     RSA * p_rsa = NULL;
     FILE * file = NULL;
+#define PRIV_KEY_SIZE 1000
+    char buf[PRIV_KEY_SIZE];
+    memset(buf, 0, PRIV_KEY_SIZE);
 
     if (NULL == (file = fopen(key_path.c_str(),"r")))
     {
         perror("open key file error");
         return NULL;
     }
- 
-    if (NULL == (p_rsa = PEM_read_RSAPrivateKey(file,NULL,NULL,NULL)))
+    fread(buf, PRIV_KEY_SIZE, 1, file);
+    //read private key from buffer
+    if (NULL == (bio = BIO_new_mem_buf(buf, -1)))
     {
-        ERR_print_errors_fp(stdout);
+        fprintf(stderr, "BIO_new_mem_buf failed!\n");
+    }
+    else if (NULL == (p_rsa = PEM_read_bio_RSAPrivateKey(bio, NULL, NULL, NULL)))
+    {
+        ERR_load_crypto_strings();
+        char errBuf[512];
+        ERR_error_string_n(ERR_get_error(), errBuf, sizeof(errBuf));
+        fprintf(stderr, "Failed to load private key [%s]\n", errBuf);
     }
 
+    BIO_free_all(bio);
     fclose(file);
-        
 
     return p_rsa;
 }
@@ -328,7 +340,7 @@ RSA * read_public_key(const string & pubkeyStr)
     RSA *rsa = NULL;
     char *chPublicKey = const_cast<char *>(pubkeyStr.c_str());
     //read public key from string
-    if ((bio = BIO_new_mem_buf(chPublicKey, -1)) == NULL)
+    if (NULL == (bio = BIO_new_mem_buf(chPublicKey, -1)))
     {
         fprintf(stderr, "BIO_new_mem_buf failed!\n");
         return NULL;

@@ -5,6 +5,9 @@ SDK for TUPU visual recognition service
 <https://www.tuputech.com>
 
 ## Changelogs
+#### v1.2.5
+- Fixed bug in reading private key on Windows
+
 #### v1.2.4
 - Fixed test example syntax
 
