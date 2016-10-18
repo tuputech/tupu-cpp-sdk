@@ -23,16 +23,15 @@ void printResult(int rc, long statusCode, const string & result);
 
 
 int main(int argc, char *argv[]) {
-    string secretId = "57beb14ed85ac2e44e4b1f83";//"your_secret_id"
-    Recognition *rec = new Recognition("/home/zhujianhui/.tupu_keys/udf_pkcs8_private_key.pem");
-    //Recognition *rec = new Recognition("Path-of-Your-PKCS8-Private-Key");
+    string secretId = "your_secret_id"
+    Recognition *rec = new Recognition("Path-of-Your-PKCS8-Private-Key");
 
     //Set sub-user identifier for billing and statistics (optional feature)
     //rec->setUID("user-bucket-xyz");
 
-    string imgUrl = "http://ww1.sinaimg.cn/mw690/8d2f96acjw1f469ypuu3lj20j60j6tbe.jpg"; //"http://www.yourdomain.com/img/1.jpg"
-    string imgPath1 = "/home/zhujianhui/sdk/tupu-cpp-sdk/test/img/1.jpg"; //"/home/user/img/1.jpg"
-    string imgPath2 = "/home/zhujianhui/sdk/tupu-cpp-sdk/test/img/2.jpg"; //"/home/user/img/2.jpg"
+    string imgUrl = "http://www.yourdomain.com/img/1.jpg"
+    string imgPath1 = "/home/user/img/1.jpg"
+    string imgPath2 = "/home/user/img/2.jpg"
 
     vector<string> images1 = { imgUrl };
     vector<string> images2 = { imgPath1, imgPath2 };
