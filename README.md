@@ -5,6 +5,10 @@ SDK for TUPU visual recognition service
 <https://www.tuputech.com>
 
 ## Changelogs
+#### v1.3
+- Modified return value type of performXXX
+- Added opErrorString function to return string describing error code
+
 #### v1.2.5
 - Fixed bug in reading private key on Windows
 
@@ -178,6 +182,15 @@ Perform a synchronous API call and functions like the other 2 performXXX, but it
 #### Return Values
 
 Returns OPC_OK on success.
+
+---------------
+
+## opErrorString
+
+Return string describing error code of Recognition::performXXX
+
+#### Synopsis
+const char * opErrorString(int err);
 
 ## License
 

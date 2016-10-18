@@ -42,6 +42,17 @@ using namespace std;
 namespace TUPU
 {
 
+enum {
+    OPC_OK = 0,
+    OPC_WRONGPARAM = -1, //Wrong parameter(s)
+    OPC_SIGNFAILED = -2, //Failed to sign request
+    OPC_SENDFAILED = -3, //Failed to send request
+    OPC_REQFAILED = -4, //Request failed
+    OPC_PARSEFAILED = -5, //Failed to parse response data
+    OPC_VERIFYFAILED = -6, //Failed to verify response signature
+    OPC_OTHERS = -10
+};
+
 typedef struct {
   char *memory;
   size_t size;
@@ -64,6 +75,33 @@ static int debug_trace(CURL *curl, curl_infotype type, char *data, size_t size, 
 #endif
 
 
+static FILE *errStream = stderr;
+void setErrorOutputStream(FILE *stream) { errStream = stream; }
+void resetErrorOutputStream() { errStream = stderr; }
+
+const char * opErrorString(int err) {
+    if (err > 0)
+        return curl_easy_strerror((CURLcode)err);
+    else if (err < 0) {
+        switch (err) {
+            case OPC_WRONGPARAM:
+                return "Wrong parameter";
+            case OPC_SIGNFAILED:
+                return "Failed to sign request";
+            case OPC_SENDFAILED:
+                return "Failded to send request";
+            case OPC_REQFAILED:
+                return "Request failed";
+            case OPC_PARSEFAILED:
+                return "Failed to parse response data";
+            case OPC_VERIFYFAILED:
+                return "Failed to verify response signature";
+            case OPC_OTHERS:
+                return "Other unclassified error";
+        }
+    }
+    return "";
+}
 
 
 Recognition::Recognition(const string & rsaPrivateKeyPath)
@@ -101,7 +139,7 @@ void Recognition::generalInit(const string & rsaPrivateKeyPath)
 }
 
 
-OpCode Recognition::performWithURL(const string & secretId, string & result, long *statusCode,
+int Recognition::performWithURL(const string & secretId, string & result, long *statusCode,
     const vector<string> & images, const vector<string> & tags)
 {
     vector<TImage> imgList;
@@ -126,7 +164,7 @@ OpCode Recognition::performWithURL(const string & secretId, string & result, lon
     return perform(secretId, imgList, result, statusCode);
 }
 
-OpCode Recognition::performWithPath(const string & secretId, string & result, long *statusCode,
+int Recognition::performWithPath(const string & secretId, string & result, long *statusCode,
     const vector<string> & images, const vector<string> & tags)
 {
     vector<TImage> imgList;
@@ -152,13 +190,13 @@ OpCode Recognition::performWithPath(const string & secretId, string & result, lo
 }
 
 
-OpCode Recognition::perform(const string & secretId, const vector<TImage> & images,
+int Recognition::perform(const string & secretId, const vector<TImage> & images,
     string & result, long *statusCode)
 {
     if (secretId.size() <=0 || images.size() <= 0)
         return OPC_WRONGPARAM;
 
-    OpCode opc = OPC_OK;
+    int opc = OPC_OK;
     char nonce[HEX_LEN];
     random_str(RND_LEN, nonce);
 
@@ -187,7 +225,7 @@ OpCode Recognition::perform(const string & secretId, const vector<TImage> & imag
 }
 
 
-OpCode Recognition::sendRequest(const string & secretId, struct curl_httppost *post,
+int Recognition::sendRequest(const string & secretId, struct curl_httppost *post,
     string & result, long *statusCode)
 {
     struct curl_slist *headerlist = NULL;
@@ -195,7 +233,7 @@ OpCode Recognition::sendRequest(const string & secretId, struct curl_httppost *p
 
     CURL *curl = NULL;
     CURLcode res = CURLE_OK;
-    OpCode opc = OPC_OK;
+    int opc = OPC_OK;
 
     MemChunk chunk;
     chunk.memory = (char*)malloc(1);  /* will be grown as needed by the realloc above */ 
@@ -232,8 +270,8 @@ OpCode Recognition::sendRequest(const string & secretId, struct curl_httppost *p
     long httpcode = 0;
     curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &httpcode);
     if (res != CURLE_OK) {
-        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        opc = OPC_SENDFAILED;
+        fprintf(errStream, "curl_easy_perform() failed: (%d) %s\n", res, curl_easy_strerror(res));
+        opc = res;//OPC_SENDFAILED;
     }
     else if (httpcode >= 200 && httpcode < 300) {
         opc = handleResponse(chunk.memory, chunk.size, result);
@@ -251,7 +289,7 @@ OpCode Recognition::sendRequest(const string & secretId, struct curl_httppost *p
     return opc;
 }
 
-OpCode Recognition::handleResponse(const char * resp, size_t resp_len, string & result)
+int Recognition::handleResponse(const char * resp, size_t resp_len, string & result)
 {
     jsmn_parser parser;
     size_t tk_len = 10;
@@ -260,7 +298,7 @@ OpCode Recognition::handleResponse(const char * resp, size_t resp_len, string & 
     jsmn_init(&parser);
     int r = jsmn_parse(&parser, resp, resp_len, tokens, tk_len);
     if (r < 0) {
-        fprintf(stderr, "Failed to parse JSON in response: %d\n", r);
+        fprintf(errStream, "Failed to parse JSON in response: %d\n", r);
         return OPC_PARSEFAILED;
     }
 
@@ -423,7 +461,7 @@ int verify_with_sha256(const string & message, const string & signature, RSA * p
     if (1 != rc) {
         char errBuf[512];
         ERR_error_string_n(ERR_get_error(), errBuf, sizeof(errBuf));
-        fprintf(stderr, "Verification failed [%s]\n", errBuf);
+        fprintf(errStream, "Verification failed [%s]\n", errBuf);
     }
 
     free(sig);
@@ -471,7 +509,7 @@ size_t write_memory(void *contents, size_t size, size_t nmemb, void *userp)
     if(mem->memory == NULL)
     {
         /* out of memory! */ 
-        fprintf(stderr, "not enough memory (realloc returned NULL)\n");
+        fprintf(errStream, "not enough memory (realloc returned NULL)\n");
         return 0;
     }
  

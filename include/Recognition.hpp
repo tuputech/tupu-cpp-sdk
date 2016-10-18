@@ -13,16 +13,8 @@ namespace TUPU
 class TImage;
 typedef struct rsa_st RSA;
 
-typedef enum {
-    OPC_OK = 0,
-    OPC_WRONGPARAM = 1, //Wrong parameter(s)
-    OPC_SIGNFAILED = 2, //Failed to sign request
-    OPC_SENDFAILED = 3, //Failed to send request
-    OPC_REQFAILED = 4, //Request failed
-    OPC_PARSEFAILED = 5, //Failed t parse response data
-    OPC_VERIFYFAILED = 6, //Failed to verify response signature
-    OPC_OTHERS = 10
-} OpCode;
+const char * opErrorString(int err);
+
 
 class Recognition
 {
@@ -38,25 +30,25 @@ class Recognition
         void setUserAgent(const std::string & ua) { m_ua = ua; }
 
     public:
-        OpCode performWithURL(const std::string & secretId,
+        int performWithURL(const std::string & secretId,
             std::string & result, long *statusCode,
             const std::vector<std::string> & imageURLs,
             const std::vector<std::string> & tags = std::vector<std::string>() );
 
-        OpCode performWithPath(const std::string & secretId,
+        int performWithPath(const std::string & secretId,
             std::string & result, long *statusCode,
             const std::vector<std::string> & imagePaths,
             const std::vector<std::string> & tags = std::vector<std::string>() );
 
         //Don't mix the use of URL and path/binary
-        OpCode perform(const std::string & secretId, const std::vector<TImage> & images,
+        int perform(const std::string & secretId, const std::vector<TImage> & images,
             std::string & result, long *statusCode);
 
     private:
         void generalInit(const std::string & rsaPrivateKeyPath);
-        OpCode sendRequest(const std::string & secretId, struct curl_httppost *post,
+        int sendRequest(const std::string & secretId, struct curl_httppost *post,
             std::string & result, long *statusCode );
-        OpCode handleResponse(const char * resp, size_t resp_len, std::string & result);
+        int handleResponse(const char * resp, size_t resp_len, std::string & result);
 
     private:
         RSA * m_rsaPrivateKey;
