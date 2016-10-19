@@ -144,7 +144,7 @@ Perform a synchronous(blocking model) API call with URLs of images. This method 
 
 #### Return Values
 
-Returns OPC_OK on success.
+Returns 0 on success.
 
 ---------------
 
@@ -161,7 +161,7 @@ Perform a synchronous(blocking model) API call with local path of images. This m
 
 #### Return Values
 
-Returns OPC_OK on success.
+Returns 0 on success.
 
 ---------------
 
@@ -181,7 +181,7 @@ Perform a synchronous API call and functions like the other 2 performXXX, but it
 
 #### Return Values
 
-Returns OPC_OK on success.
+Returns 0 on success.
 
 ---------------
 
