@@ -246,6 +246,10 @@ int Recognition::sendRequest(const string & secretId, struct curl_httppost *post
     string url = m_apiUrl + secretId;
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
+    // This option is here to allow multi-threaded unix applications to still set/use
+    // all timeout options etc, without risking getting signals.
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1); 
+
     // set form-data to post
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
     curl_easy_setopt(curl, CURLOPT_HTTPPOST, post);
