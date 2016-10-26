@@ -296,11 +296,11 @@ int Recognition::sendRequest(const string & secretId, struct curl_httppost *post
 int Recognition::handleResponse(const char * resp, size_t resp_len, string & result)
 {
     jsmn_parser parser;
-    size_t tk_len = 10;
-    jsmntok_t tokens[tk_len];
+#define TK_LEN 10
+    jsmntok_t tokens[TK_LEN];
 
     jsmn_init(&parser);
-    int r = jsmn_parse(&parser, resp, resp_len, tokens, tk_len);
+    int r = jsmn_parse(&parser, resp, resp_len, tokens, TK_LEN);
     if (r < 0) {
         fprintf(errStream, "Failed to parse JSON in response: %d\n", r);
         return OPC_PARSEFAILED;
