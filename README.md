@@ -5,6 +5,9 @@ SDK for TUPU visual recognition service
 <https://www.tuputech.com>
 
 ## Changelogs
+#### v1.3.2
+- Fixed signing bug on win
+
 #### v1.3.1
 - Setting CURLOPT_NOSIGNAL as 1 for multi-threading
 
