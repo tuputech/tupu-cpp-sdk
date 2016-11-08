@@ -35,7 +35,7 @@
 
 #define RND_LEN 3
 #define HEX_LEN RND_LEN * 2 + 1
-
+#define PRIV_KEY_SIZE 1000
 
 using namespace std;
 
@@ -58,8 +58,8 @@ typedef struct {
   size_t size;
 } MemChunk;
 
-
-static RSA * read_private_key(const string & key_path);
+static int get_private_key_content(const string & key_path, char *buf, size_t key_size);
+static RSA * read_private_key(char *buf);
 static RSA * read_public_key(const string & pubkeyStr);
 static RSA * read_tupu_pubkey();
 static int sign_with_sha256(const string & message, RSA * p_rsa, string & result);
@@ -109,6 +109,7 @@ Recognition::Recognition(const string & rsaPrivateKeyPath)
     , m_tupuPublicKey(NULL)
     , m_apiUrl(TUPU_API)
     , m_ua(USER_AGENT)
+    , m_priKeyBuf(NULL)
 {
     generalInit(rsaPrivateKeyPath);
 }
@@ -118,21 +119,28 @@ Recognition::Recognition(const string & rsaPrivateKeyPath, const string & apiUrl
     , m_tupuPublicKey(NULL)
     , m_apiUrl(apiUrl)
     , m_ua(USER_AGENT)
+    , m_priKeyBuf(NULL)
 {
     generalInit(rsaPrivateKeyPath);
 }
 
 Recognition::~Recognition()
 {
-    RSA_free(m_rsaPrivateKey);
+    //RSA_free(m_rsaPrivateKey);
     RSA_free(m_tupuPublicKey);
+
+    free(m_priKeyBuf);
 
     curl_global_cleanup();
 }
 
 void Recognition::generalInit(const string & rsaPrivateKeyPath)
 {
-    m_rsaPrivateKey = read_private_key(rsaPrivateKeyPath);
+    //m_rsaPrivateKey = read_private_key(rsaPrivateKeyPath);
+    m_priKeyBuf = (char*)malloc(PRIV_KEY_SIZE);
+    memset(m_priKeyBuf, 0, PRIV_KEY_SIZE);
+    get_private_key_content(rsaPrivateKeyPath, m_priKeyBuf, PRIV_KEY_SIZE-1);
+    
     m_tupuPublicKey = read_tupu_pubkey();
 
     curl_global_init(CURL_GLOBAL_ALL);
@@ -209,7 +217,9 @@ int Recognition::perform(const string & secretId, const vector<TImage> & images,
     s << secretId << "," << tsBuf << "," << nonce;
     string msg = s.str(), signature;
 
-    int rc = sign_with_sha256(msg, m_rsaPrivateKey, signature);
+    RSA * rsaPrivateKey = read_private_key(m_priKeyBuf);
+    int rc = sign_with_sha256(msg, rsaPrivateKey, signature);
+    RSA_free(rsaPrivateKey);
     if (1 != rc) {
         return OPC_SIGNFAILED;
     }
@@ -338,24 +348,28 @@ int Recognition::handleResponse(const char * resp, size_t resp_len, string & res
 
 
 
-
-
 static
-RSA * read_private_key(const string & key_path)
+int get_private_key_content(const string & key_path, char *buf, size_t key_size)
 {
-    BIO *bio = NULL;
-    RSA * p_rsa = NULL;
     FILE * file = NULL;
-#define PRIV_KEY_SIZE 1000
-    char buf[PRIV_KEY_SIZE];
-    memset(buf, 0, PRIV_KEY_SIZE);
 
     if (NULL == (file = fopen(key_path.c_str(),"r")))
     {
         perror("open key file error");
-        return NULL;
+        return -1;
     }
-    fread(buf, PRIV_KEY_SIZE, 1, file);
+    fread(buf, key_size, 1, file);
+
+    fclose(file);
+    return 0;
+}
+
+static
+RSA * read_private_key(char *buf)
+{
+    BIO *bio = NULL;
+    RSA * p_rsa = NULL;
+    
     //read private key from buffer
     if (NULL == (bio = BIO_new_mem_buf(buf, -1)))
     {
@@ -370,7 +384,6 @@ RSA * read_private_key(const string & key_path)
     }
 
     BIO_free_all(bio);
-    fclose(file);
 
     return p_rsa;
 }

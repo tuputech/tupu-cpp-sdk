@@ -56,6 +56,7 @@ class Recognition
         std::string m_apiUrl;
         std::string m_uid;
         std::string m_ua;
+        char * m_priKeyBuf;
 }; //Class Recognition
 
 } //namespace TUPU
