@@ -10,6 +10,8 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <vector>
+#include <time.h>
+#include <sys/time.h>
 
 #include "Base64.hpp"
 #include "TImage.hpp"
@@ -19,7 +21,8 @@ using namespace std;
 using namespace TUPU;
 
 void loadImage(vector<TImage> & images, const char * path, const char * tag = NULL);
-void printResult(int rc, long statusCode, const string & result);
+void printResult(int rc, long statusCode, const string & result, long start);
+long getTime();
 
 
 int main(int argc, char *argv[]) {
@@ -41,14 +44,17 @@ int main(int argc, char *argv[]) {
     long statusCode = 0;
     int rc = 0;
 
+    long start = getTime();
     //Providing URLs of images with tags (optional)
     rc = rec->performWithURL(secretId, result, &statusCode, images1, tags);
-    printResult(rc, statusCode, result);
+    printResult(rc, statusCode, result, start);
 
+    start = getTime();
     //Providing paths of images without tags (optional)
     rc = rec->performWithPath(secretId, result, &statusCode, images2);
-    printResult(rc, statusCode, result);
+    printResult(rc, statusCode, result, start);
 
+    start = getTime();
     //Providing image binary and path
     vector<TImage> images3;
     loadImage(images3, imgPath2.c_str(), "Room102");
@@ -57,7 +63,7 @@ int main(int argc, char *argv[]) {
     timg.setTag("Room103");
     images3.push_back(timg);
     rc = rec->perform(secretId, images3, result, &statusCode);
-    printResult(rc, statusCode, result);
+    printResult(rc, statusCode, result, start);
 
     delete rec;
 
@@ -90,11 +96,18 @@ void loadImage(vector<TImage> & images, const char * path, const char * tag)
     f.close();
 }
 
-void printResult(int rc, long statusCode, const string & result)
+void printResult(int rc, long statusCode, const string & result, long start)
 {
     cout << "- Perform returns: " << rc << " " << TUPU::opErrorString(rc) << endl;
     cout << "- HTTP Status Code: " << statusCode << endl;
+    cout << "- Elapsed time: " << (getTime() - start) << "ms" << endl;
     cout << "- Result: " << endl << result << endl;
 }
 
+long getTime()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec*1000 + tv.tv_usec/1000;
+}
 
