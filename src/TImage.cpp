@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 
@@ -37,7 +38,7 @@ TImage::TImage(const TImage & img)
 
 TImage::~TImage()
 {
-    free(m_buffer);
+    std::free(m_buffer);
 }
 
 TImage & TImage::operator=(const TImage & img)
@@ -58,7 +59,7 @@ void TImage::setURL(const string & url)
 {
     m_url = url;
     m_path.clear();
-    free(m_buffer);
+    std::free(m_buffer);
     m_len = 0;
     m_filename.clear();
 }
@@ -67,7 +68,7 @@ void TImage::setPath(const string & filepath)
 {
     m_path = filepath;
     m_url.clear();
-    free(m_buffer);
+    std::free(m_buffer);
     m_len = 0;
     m_filename.clear();
 }
@@ -76,7 +77,7 @@ void TImage::setBinary(const void * buf, size_t buf_len, const string & filename
 {
     m_len = buf_len;
     m_filename = filename;
-    m_buffer = malloc(buf_len);
+    m_buffer = std::malloc(buf_len);
     memcpy(m_buffer, buf, buf_len);
 
     m_url.clear();
