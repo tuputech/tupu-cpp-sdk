@@ -508,7 +508,8 @@ void parse_json_value(const char *src, size_t len, string & result)
     memset(buf, 0, len+1);
     size_t j = 0;
     for (size_t i = 0; i < len; i++) {
-        if ((i == 0 || src[i-1] != '\\') && src[i] == '\\' && src[i+1] == '"')
+        //if ((i == 0 || src[i-1] != '\\') && src[i] == '\\' && src[i+1] == '"')
+        if (i > 0 && src[i-1] != '\\' && src[i] == '\\')
             i++;
         buf[j++] = src[i];
     }
