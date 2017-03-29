@@ -333,7 +333,8 @@ int Recognition::handleResponse(const char * resp, size_t resp_len, string & res
                 signature = string(vs, vl);
         }
     }
-
+    // printf("Response result:\n%s\n-------\n", string(resp, resp_len).c_str());
+    // printf("JSON result:\n%s\n-------\n", json.c_str());
     int rc = verify_with_sha256(json, signature, m_tupuPublicKey);
     if (1 != rc) {
         return OPC_VERIFYFAILED;
@@ -507,11 +508,20 @@ void parse_json_value(const char *src, size_t len, string & result)
     char *buf = (char*)malloc(len+1);
     memset(buf, 0, len+1);
     size_t j = 0;
+    size_t lasti = len - 1;
     for (size_t i = 0; i < len; i++) {
         //if ((i == 0 || src[i-1] != '\\') && src[i] == '\\' && src[i+1] == '"')
-        if (i > 0 && src[i-1] != '\\' && src[i] == '\\')
-            i++;
-        buf[j++] = src[i];
+        char c = src[i];
+        if (src[i] == '\\' && i < lasti)
+        {
+            char nx = src[i+1];
+            if (nx == 'n' || nx == 'r' || nx == 't' || nx == '\\' || nx == '\'' || nx == '"' || nx == '?')
+            {
+                c = nx;
+                i++;
+            }
+        }
+        buf[j++] = c;
     }
     result = string(buf);
     free(buf);
