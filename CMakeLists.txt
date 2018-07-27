@@ -10,6 +10,7 @@ cmake_minimum_required (VERSION 2.8)
 
 project (Demo1)
 
+set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_CXX_FLAGS "-O2 -g -Wall -Wno-unused-function -std=c++11")
 
 find_package(OpenSSL)
