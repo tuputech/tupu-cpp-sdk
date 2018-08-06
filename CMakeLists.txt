@@ -21,6 +21,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif ()
 set(CMAKE_CXX_FLAGS "-O2 -g -Wall -Wno-unused-function -std=c++11")
 
+#set(OPENSSL_ROOT_PATH "/usr/local/Cellar/openssl/1.0.2o_2")
+#set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_PATH}/include")
+
 find_package(OpenSSL)
 find_package(CURL)
 
