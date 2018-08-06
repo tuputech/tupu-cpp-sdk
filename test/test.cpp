@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
     Recognition *rec = new Recognition("Path-of-Your-PKCS8-Private-Key");
 
 //    Set sub-user identifier for billing and statistics (optional feature)
-    rec->setUID("user-bucket-xyz");
+//    rec->setUID("user-bucket-xyz");
 
     string imgUrl = "http://www.yourdomain.com/img/1.jpg";
     string imgPath1 = "/home/user/img/1.jpg";
