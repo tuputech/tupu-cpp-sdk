@@ -9,6 +9,7 @@
 cmake_minimum_required (VERSION 2.8)
 
 project (Demo1)
+set(debug 1)
 
 if (debug)
     set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -27,9 +28,15 @@ set(CMAKE_CXX_FLAGS "-O2 -g -Wall -Wno-unused-function -std=c++11")
 find_package(OpenSSL)
 find_package(CURL)
 
+if (debug AND CURL_FOUND)
+    message(STATUS "${CURL_INCLUDE_DIRS}")
+    message(STATUS "${CURL_LIBRARIES}")
+    message(STATUS "${CURL_VERSION_STRING}")
+endif ()
+
 include_directories(
     ${OPENSSL_INCLUDE_DIR}
-    ${CURL_INCLUDE_DIR}
+    ${CURL_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/include
 )
 

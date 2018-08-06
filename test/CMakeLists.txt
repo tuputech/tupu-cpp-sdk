@@ -11,7 +11,7 @@ include_directories(
 )
 
 add_executable(testApp test.cpp)
-target_link_libraries(testApp tupu_static ${OPENSSL_LIBRARIES} ${CURL_LIBRARY})
+target_link_libraries(testApp tupu_static ${OPENSSL_LIBRARIES} ${CURL_LIBRARIES})
 
 #add_executable(testsign test-sign.cpp)
 #target_link_libraries(testsign ${OPENSSL_LIBRARIES})
