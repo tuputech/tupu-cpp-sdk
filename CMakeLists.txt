@@ -34,6 +34,10 @@ if (debug AND CURL_FOUND)
     message(STATUS "${CURL_VERSION_STRING}")
 endif ()
 
+if(${CURL_VERSION_STRING} STRLESS "7.56.0") # MIME API supported, curl_formadd is deprecated.
+    message(FATAL_ERROR "curl version neeed at least 7.56.0")
+endif()
+
 include_directories(
     ${OPENSSL_INCLUDE_DIR}
     ${CURL_INCLUDE_DIRS}
