@@ -16,7 +16,9 @@ if (debug)
     message(STATUS ${CMAKE_SYSTEM_NAME})
 endif ()
 
-set(CMAKE_MACOSX_RPATH 1)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(CMAKE_MACOSX_RPATH 1)
+endif ()
 set(CMAKE_CXX_FLAGS "-O2 -g -Wall -Wno-unused-function -std=c++11")
 
 find_package(OpenSSL)
