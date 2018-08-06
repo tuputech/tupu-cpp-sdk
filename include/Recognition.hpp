@@ -7,6 +7,8 @@
 #ifndef __TUPU_RECOGNITION_H__
 #define __TUPU_RECOGNITION_H__
 
+#include "curl/curl.h"
+
 namespace TUPU
 {
 
@@ -46,8 +48,9 @@ class Recognition
 
     private:
         void generalInit(const std::string & rsaPrivateKeyPath);
-        int sendRequest(const std::string & secretId, struct curl_httppost *post,
-            std::string & result, long *statusCode );
+
+        int sendRequest(CURL *curl, curl_mime *form, const std::string & secretId,
+                        std::string & result, long *statusCode);
         int handleResponse(const char * resp, size_t resp_len, std::string & result);
 
     private:

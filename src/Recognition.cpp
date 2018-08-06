@@ -67,7 +67,7 @@ static int verify_with_sha256(const string & message, const string & signature, 
 static void random_str(size_t len, char *output);
 static void parse_json_value(const char *src, size_t len, string & result);
 static size_t write_memory(void *contents, size_t size, size_t nmemb, void *userp);
-static void compose_form(struct curl_httppost ** post, const vector<TImage> & images,
+static void compose_form(curl_mime *form, const vector<TImage> & images,
     const string & timestamp, const string & nonce,
     const string & signature, const string & uid);
 #if VERB_LEV >= 2
@@ -224,24 +224,37 @@ int Recognition::perform(const string & secretId, const vector<TImage> & images,
         return OPC_SIGNFAILED;
     }
 
-    struct curl_httppost *formpost = NULL;
-    compose_form(&formpost, images, tsBuf, nonce, signature, m_uid);
-    if (NULL == formpost)
-        return OPC_OTHERS;
+    CURL *curl = curl_easy_init();
+	if (NULL == curl){
+		cout <<"curl_easy_init() failed!" <<endl;
+		return OPC_OTHERS;
+	}
+	
+    curl_mime *form = curl_mime_init(curl);
+	if (NULL == form){
+		cout <<"curl_mime_init() failed!" <<endl;
+		return OPC_OTHERS;
+	}
 
-    opc = sendRequest(secretId, formpost, result, statusCode);
-    curl_formfree(formpost);
+    compose_form(form, images, tsBuf, nonce, signature, m_uid);
+
+    opc = sendRequest(curl, form, secretId, result, statusCode);
+
+//    curl_formfree(formpost);
+
+    curl_mime_free(form);
+    curl_easy_cleanup(curl);
+
     return opc;
 }
 
 
-int Recognition::sendRequest(const string & secretId, struct curl_httppost *post,
+int Recognition::sendRequest(CURL *curl, curl_mime *form, const string & secretId,
     string & result, long *statusCode)
 {
     struct curl_slist *headerlist = NULL;
     static const char buf[] = "Expect: 100-continue";
 
-    CURL *curl = NULL;
     CURLcode res = CURLE_OK;
     int opc = OPC_OK;
 
@@ -250,8 +263,6 @@ int Recognition::sendRequest(const string & secretId, struct curl_httppost *post
     chunk.size = 0; 
 
     headerlist = curl_slist_append(headerlist, buf);
-
-    curl = curl_easy_init();
 
     string url = m_apiUrl + secretId;
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -262,7 +273,7 @@ int Recognition::sendRequest(const string & secretId, struct curl_httppost *post
 
     // set form-data to post
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-    curl_easy_setopt(curl, CURLOPT_HTTPPOST, post);
+    curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
 
     /* send all data to this function  */ 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_memory);
@@ -294,7 +305,6 @@ int Recognition::sendRequest(const string & secretId, struct curl_httppost *post
         opc = OPC_REQFAILED;
     }
 
-    curl_easy_cleanup(curl);
     curl_slist_free_all (headerlist);
 
     free(chunk.memory);
@@ -548,71 +558,60 @@ size_t write_memory(void *contents, size_t size, size_t nmemb, void *userp)
     return realsize;
 }
 
+//static
+//void compose_form(struct curl_httppost ** post, const vector<TImage> & images,
+//    const string & timestamp, const string & nonce,
+//    const string & signature, const string & uid)
 static
-void compose_form(struct curl_httppost ** post, const vector<TImage> & images,
-    const string & timestamp, const string & nonce,
-    const string & signature, const string & uid)
+void compose_form(curl_mime *form, const vector<TImage> & images,
+                     const string & timestamp, const string & nonce,
+                     const string & signature, const string & uid)
 {
-    struct curl_httppost* last = NULL;
-    curl_formadd(post, &last,
-               CURLFORM_COPYNAME, "timestamp",
-               CURLFORM_COPYCONTENTS, timestamp.c_str(),
-               CURLFORM_END);
-    curl_formadd(post, &last,
-               CURLFORM_COPYNAME, "nonce",
-               CURLFORM_COPYCONTENTS, nonce.c_str(),
-               CURLFORM_END);
-    curl_formadd(post, &last,
-               CURLFORM_COPYNAME, "signature",
-               CURLFORM_COPYCONTENTS, signature.c_str(),
-               CURLFORM_END);
+    curl_mimepart *field = NULL;
+
+    field = curl_mime_addpart(form);
+    curl_mime_name(field, "timestamp");
+    curl_mime_data(field, timestamp.c_str(), CURL_ZERO_TERMINATED);
+
+    field = curl_mime_addpart(form);
+    curl_mime_name(field, "nonce");
+    curl_mime_data(field, nonce.c_str(), CURL_ZERO_TERMINATED);
+
+    field = curl_mime_addpart(form);
+    curl_mime_name(field, "signature");
+    curl_mime_data(field, signature.c_str(), CURL_ZERO_TERMINATED);
 
     if (!uid.empty()) {
-        curl_formadd(post, &last,
-                   CURLFORM_COPYNAME, "uid",
-                   CURLFORM_COPYCONTENTS, uid.c_str(),
-                   CURLFORM_END);
+        field = curl_mime_addpart(form);
+        curl_mime_name(field, "uid");
+        curl_mime_data(field, uid.c_str(), CURL_ZERO_TERMINATED);
     }
 
     unsigned int i = 0;
-    do
-    {
-        struct curl_httppost* prev = last;
+    do {
         const TImage & img = images[i];
-        if (!img.path().empty())
-        {
-            //Upload file with file path
-            curl_formadd(post, &last,
-               CURLFORM_COPYNAME, "image",
-               CURLFORM_FILE, img.path().c_str(),
-               CURLFORM_END);
+
+        if (!img.path().empty()) {
+            field = curl_mime_addpart(form);
+            curl_mime_name(field, "image");
+            curl_mime_filedata(field, img.path().c_str());
         }
-        else if (!img.url().empty())
-        {
-            //File URL
-            curl_formadd(post, &last,
-               CURLFORM_COPYNAME, "image",
-               CURLFORM_COPYCONTENTS, img.url().c_str(),
-               CURLFORM_END);
+        else if (!img.url().empty()) {
+            field = curl_mime_addpart(form);
+            curl_mime_name(field, "image");
+            curl_mime_data(field, img.url().c_str(), CURL_ZERO_TERMINATED);
         }
-        else if (img.buffer())
-        {
-            //CURLFORM_CONTENTTYPE, "application/octet-stream",
-            /* Add a buffer to upload */
-            curl_formadd(post, &last,
-                CURLFORM_COPYNAME, "image",
-                CURLFORM_BUFFER, img.filename().c_str(),
-                CURLFORM_BUFFERPTR, img.buffer(),
-                CURLFORM_BUFFERLENGTH, img.bufferLength(),
-                CURLFORM_END);
+        else if (img.buffer()) {
+            field = curl_mime_addpart(form);
+            curl_mime_name(field, "image");
+            curl_mime_filename(field, img.filename().c_str());
+            curl_mime_data(field, (const char *)img.buffer(), (curl_off_t)img.bufferLength());
         }
 
-        if (prev != last && !img.tag().empty())
-        {
-            curl_formadd(post, &last,
-               CURLFORM_COPYNAME, "tag",
-               CURLFORM_COPYCONTENTS, img.tag().c_str(),
-               CURLFORM_END);
+        if (!img.tag().empty()){
+            field = curl_mime_addpart(form);
+            curl_mime_name(field, "tag");
+            curl_mime_data(field, img.tag().c_str(), CURL_ZERO_TERMINATED);
         }
     } while (++i < images.size());
 }
