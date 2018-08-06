@@ -5,6 +5,13 @@ SDK for TUPU visual recognition service
 <https://www.tuputech.com>
 
 ## Changelogs
+<!---
+### v1.4
+- CMake Errors fixed
+- update to support MIME API, and `curl_formadd` API is deprecated
+- add debug rule in [CMakeLists.txt](CMakeLists.txt)
+-->
+
 #### v1.3.3
 - Fixed bug in handling JSON result extraction
 
@@ -181,6 +188,8 @@ Perform a synchronous API call and functions like the other 2 performXXX, but it
 ### NOTES:
 - Please don't mix use of URL and path/binary in ONE call
 - If using tag, please set tag for all images
+- upgrade curl version to at least 7.56.0, and MIME API supported, `curl_formadd` deprecated
+- specify the OPENSSL_ROOT_PATH in [`CMakeLists.txt`](CMakeLists.txt)
 
 #### Parameters
 - **secretId**: user's secret-id for accessing the API
