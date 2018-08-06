@@ -8,3 +8,5 @@ test/img/
 test/test-local.cpp
 
 test2/
+
+cmake-build-debug
