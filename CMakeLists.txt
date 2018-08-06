@@ -10,6 +10,12 @@ cmake_minimum_required (VERSION 2.8)
 
 project (Demo1)
 
+if (debug)
+    set(CMAKE_VERBOSE_MAKEFILE ON)
+    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -O0")
+    message(STATUS ${CMAKE_SYSTEM_NAME})
+endif ()
+
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_CXX_FLAGS "-O2 -g -Wall -Wno-unused-function -std=c++11")
 
