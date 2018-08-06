@@ -15,12 +15,14 @@ if (debug)
     set(CMAKE_VERBOSE_MAKEFILE ON)
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -O0")
     message(STATUS ${CMAKE_SYSTEM_NAME})
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(CMAKE_MACOSX_RPATH 1)
 endif ()
-set(CMAKE_CXX_FLAGS "-O2 -g -Wall -Wno-unused-function -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unused-function -std=c++11")
 
 set(OPENSSL_ROOT_PATH "/usr/local/Cellar/openssl/1.0.2o_2")  # default OPENSSL_ROOT_PATH, need change
 set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_PATH}/include")
