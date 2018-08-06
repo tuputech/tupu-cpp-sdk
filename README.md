@@ -5,12 +5,10 @@ SDK for TUPU visual recognition service
 <https://www.tuputech.com>
 
 ## Changelogs
-<!---
 ### v1.4
 - CMake Errors fixed
 - update to support MIME API, and `curl_formadd` API is deprecated
 - add debug rule in [CMakeLists.txt](CMakeLists.txt)
--->
 
 #### v1.3.3
 - Fixed bug in handling JSON result extraction
@@ -19,11 +17,11 @@ SDK for TUPU visual recognition service
 - Fixed signing bug on win
 
 #### v1.3.1
-- Setting CURLOPT_NOSIGNAL as 1 for multi-threading
+- Setting `CURLOPT_NOSIGNAL` as 1 for multi-threading
 
 #### v1.3
-- Modified return value type of performXXX
-- Added opErrorString function to return string describing error code
+- Modified return value type of `performXXX`
+- Added `opErrorString` function to return string describing error code
 
 #### v1.2.5
 - Fixed bug in reading private key on Windows
@@ -49,14 +47,19 @@ SDK for TUPU visual recognition service
 
 ## Requirements
 
+### Uinux/Linux ###
 - openssl & openssl-devel (openssl-dev)
-- libcurl & libcurl-devel (libcurl-dev)
+- libcurl & libcurl-devel (libcurl-dev), at least 7.56.0 version
 - cmake
 
+### Darwin ###
+- opensll
+- libcurl, at least 7.56.0 version
+- cmake
 
 ## Building
 
-```
+```shell
     $ cmake .
     $ make
 ```
@@ -68,7 +71,7 @@ SDK for TUPU visual recognition service
 
 ## Example
 
-```
+```cpp
 int main(int argc, char *argv[]) {
     string secretId = "your_secret_id";
     Recognition *rec = new Recognition("Path-of-Your-PKCS8-Private-Key");
@@ -147,41 +150,41 @@ void printResult(OpCode rc, long statusCode, const string & result)
 
 ---------------
 
-## Recognition::performWithURL
+## `Recognition::performWithURL`
 
 Perform a synchronous(blocking model) API call with URLs of images. This method can be called multiple times simultaneously.
 
 #### Parameters
-- **secretId**: user's secret-id for accessing the API
-- **result**: recognition result in JSON string from server
-- **statusCode**: status code of response
-- **imageURLs**: list of image URLs
-- **tags**: list of tags for images (optional)
+- `secretId`: user's secret-id for accessing the API
+- `result`: recognition result in JSON string from server
+- `statusCode`: status code of response
+- `imageURLs`: list of image URLs
+- `tags`: list of tags for images (optional)
 
 #### Return Values
 
-Returns 0 on success.
+Returns `0` on success.
 
 ---------------
 
-## Recognition::performWithPath
+## `Recognition::performWithPath`
 
 Perform a synchronous(blocking model) API call with local path of images. This method can be called multiple times simultaneously.
 
 #### Parameters
-- **secretId**: user's secret-id for accessing the API
-- **result**: recognition result in JSON string from server
-- **statusCode**: status code of response
-- **imagePaths**: list of image local paths
-- **tags**: list of tags for images (optional)
+- `secretId` user's secret-id for accessing the API
+- `result`: recognition result in JSON string from server
+- `statusCode`: status code of response
+- `imagePaths`: list of image local paths
+- `tags`: list of tags for images (optional)
 
 #### Return Values
 
-Returns 0 on success.
+Returns `0` on success.
 
 ---------------
 
-## Recognition::perform
+## `Recognition::perform`
 
 Perform a synchronous API call and functions like the other 2 performXXX, but it also supports image binary.
 
@@ -192,23 +195,23 @@ Perform a synchronous API call and functions like the other 2 performXXX, but it
 - specify the `OPENSSL_ROOT_PATH` in [`CMakeLists.txt`](CMakeLists.txt)
 
 #### Parameters
-- **secretId**: user's secret-id for accessing the API
-- **images**: list of TImage objects
-- **result**: recognition result in JSON string from server
-- **statusCode**: status code of response
+- `secretId`: user's secret-id for accessing the API
+- `images`: list of `TImage` objects
+- `result`: recognition result in JSON string from server
+- `statusCode`: status code of response
 
 #### Return Values
 
-Returns 0 on success.
+Returns `0` on success.
 
 ---------------
 
-## opErrorString
+## `opErrorString`
 
-Return string describing error code of Recognition::performXXX
+Return string describing error code of `Recognition::performXXX`
 
 #### Synopsis
-const char * opErrorString(int err);
+`const char * opErrorString(int err);`
 
 ## License
 
