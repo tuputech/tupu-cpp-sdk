@@ -1,32 +1,4 @@
 /Applications/CLion.app/Contents/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/usr/bin/make -DCMAKE_C_COMPILER=/Library/Developer/CommandLineTools/usr/bin/cc -DCMAKE_CXX_COMPILER=/Library/Developer/CommandLineTools/usr/bin/c++ -G "CodeBlocks - Unix Makefiles" /Users/kang/project/github/tupu-cpp-sdk
--- The C compiler identification is AppleClang 9.1.0.9020039
--- The CXX compiler identification is AppleClang 9.1.0.9020039
--- Check for working C compiler: /Library/Developer/CommandLineTools/usr/bin/cc
--- Check for working C compiler: /Library/Developer/CommandLineTools/usr/bin/cc -- works
--- Detecting C compiler ABI info
--- Detecting C compiler ABI info - done
--- Detecting C compile features
--- Detecting C compile features - done
--- Check for working CXX compiler: /Library/Developer/CommandLineTools/usr/bin/c++
--- Check for working CXX compiler: /Library/Developer/CommandLineTools/usr/bin/c++ -- works
--- Detecting CXX compiler ABI info
--- Detecting CXX compiler ABI info - done
--- Detecting CXX compile features
--- Detecting CXX compile features - done
--- Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR (missing: OPENSSL_INCLUDE_DIR) 
--- Found CURL: /usr/local/lib/libcurl.dylib (found version "7.61.0") 
-CMake Error: The following variables are used in this project, but they are set to NOTFOUND.
-Please set them or make sure they are set and tested correctly in the CMake files:
-OPENSSL_INCLUDE_DIR (ADVANCED)
-   used as include directory in directory /Users/kang/project/github/tupu-cpp-sdk
-   used as include directory in directory /Users/kang/project/github/tupu-cpp-sdk
-   used as include directory in directory /Users/kang/project/github/tupu-cpp-sdk/src
-   used as include directory in directory /Users/kang/project/github/tupu-cpp-sdk/src
-   used as include directory in directory /Users/kang/project/github/tupu-cpp-sdk/src
-   used as include directory in directory /Users/kang/project/github/tupu-cpp-sdk/src
-   used as include directory in directory /Users/kang/project/github/tupu-cpp-sdk/test
-   used as include directory in directory /Users/kang/project/github/tupu-cpp-sdk/test
-   used as include directory in directory /Users/kang/project/github/tupu-cpp-sdk/test
-
--- Configuring incomplete, errors occurred!
-See also "/Users/kang/project/github/tupu-cpp-sdk/cmake-build-debug/CMakeFiles/CMakeOutput.log".
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /Users/kang/project/github/tupu-cpp-sdk/cmake-build-debug

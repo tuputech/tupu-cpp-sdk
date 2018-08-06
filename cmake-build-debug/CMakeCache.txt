@@ -363,6 +363,8 @@ CURL_INCLUDE_DIR-ADVANCED:INTERNAL=1
 CURL_LIBRARY-ADVANCED:INTERNAL=1
 //Details about finding CURL
 FIND_PACKAGE_MESSAGE_DETAILS_CURL:INTERNAL=[/usr/local/lib/libcurl.dylib][/usr/local/include][v7.61.0()]
+//Details about finding OpenSSL
+FIND_PACKAGE_MESSAGE_DETAILS_OpenSSL:INTERNAL=[/usr/lib/libcrypto.dylib][/usr/local/Cellar/openssl/1.0.2o_2/include][v1.0.2o()]
 //ADVANCED property for variable: OPENSSL_CRYPTO_LIBRARY
 OPENSSL_CRYPTO_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: OPENSSL_INCLUDE_DIR
