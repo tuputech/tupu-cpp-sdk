@@ -6,8 +6,22 @@
 
 test/img/
 
+test/test-sample.cpp
+
 test/test-local.cpp
 
 test2/
 
+
 cmake-build-debug
+
+**/CMakeFiles/
+
+**/*.cmake
+
+**/Makefile
+
+CMakeCache.txt
+
+lib/
+

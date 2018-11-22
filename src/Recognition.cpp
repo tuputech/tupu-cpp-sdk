@@ -105,21 +105,21 @@ const char * opErrorString(int err) {
 
 
 Recognition::Recognition(const string & rsaPrivateKeyPath)
-    : m_rsaPrivateKey(NULL)
-    , m_tupuPublicKey(NULL)
-    , m_apiUrl(TUPU_API)
-    , m_ua(USER_AGENT)
-    , m_priKeyBuf(NULL)
+    : //m_rsaPrivateKey(NULL),
+    m_tupuPublicKey(NULL),
+    m_apiUrl(TUPU_API),
+    m_ua(USER_AGENT),
+    m_priKeyBuf(NULL)
 {
     generalInit(rsaPrivateKeyPath);
 }
 
 Recognition::Recognition(const string & rsaPrivateKeyPath, const string & apiUrl)
-    : m_rsaPrivateKey(NULL)
-    , m_tupuPublicKey(NULL)
-    , m_apiUrl(apiUrl)
-    , m_ua(USER_AGENT)
-    , m_priKeyBuf(NULL)
+    : //m_rsaPrivateKey(NULL),
+    m_tupuPublicKey(NULL),
+    m_apiUrl(apiUrl),
+    m_ua(USER_AGENT),
+    m_priKeyBuf(NULL)
 {
     generalInit(rsaPrivateKeyPath);
 }

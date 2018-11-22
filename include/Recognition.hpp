@@ -54,7 +54,7 @@ class Recognition
         int handleResponse(const char * resp, size_t resp_len, std::string & result);
 
     private:
-        RSA * m_rsaPrivateKey;
+        //RSA * m_rsaPrivateKey;
         RSA * m_tupuPublicKey;
         std::string m_apiUrl;
         std::string m_uid;
