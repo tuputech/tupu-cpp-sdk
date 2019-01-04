@@ -242,7 +242,6 @@ int Recognition::perform(const string & secretId, const vector<TImage> & images,
     m_param["nonce"] = std::string(nonce);
     m_param["signature"] =  std::string(signature);
     m_param["uid"] = m_uid;
-    m_param["cid"] = "-";
 
     //compose_form(form, images, tsBuf, nonce, signature, m_uid);
     compose_form(form, images, m_param);
