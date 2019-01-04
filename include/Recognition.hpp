@@ -8,6 +8,10 @@
 #define __TUPU_RECOGNITION_H__
 
 #include "curl/curl.h"
+#include <map>
+#include <iostream>
+#include <string>
+#include <iomanip>
 
 namespace TUPU
 {
@@ -30,6 +34,10 @@ class Recognition
         void setUID(const std::string & uid) { m_uid = uid; }
         //Set user-agent of request(s)
         void setUserAgent(const std::string & ua) { m_ua = ua; }
+
+        void setParameter(std::map<std::string, std::string> param) {m_param = param;}
+
+        void setCid(std::string value) {m_param["CID"] = value;}
 
     public:
         int performWithURL(const std::string & secretId,
@@ -59,6 +67,7 @@ class Recognition
         std::string m_apiUrl;
         std::string m_uid;
         std::string m_ua;
+        std::map<std::string, std::string> m_param;
         char * m_priKeyBuf;
 }; //Class Recognition
 
