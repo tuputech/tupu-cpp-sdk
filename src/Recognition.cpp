@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <map>
 #include <openssl/sha.h>
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
@@ -70,6 +71,7 @@ static size_t write_memory(void *contents, size_t size, size_t nmemb, void *user
 static void compose_form(curl_mime *form, const vector<TImage> & images,
     const string & timestamp, const string & nonce,
     const string & signature, const string & uid);
+static void compose_form(curl_mime *form, const vector<TImage> & images, std::map<std::string, std::string> params);
 #if VERB_LEV >= 2
 static int debug_trace(CURL *curl, curl_infotype type, char *data, size_t size, void *userptr);
 #endif
@@ -236,7 +238,14 @@ int Recognition::perform(const string & secretId, const vector<TImage> & images,
 		return OPC_OTHERS;
 	}
 
-    compose_form(form, images, tsBuf, nonce, signature, m_uid);
+    m_param["timestamp"] = std::string(tsBuf);
+    m_param["nonce"] = std::string(nonce);
+    m_param["signature"] =  std::string(signature);
+    m_param["uid"] = m_uid;
+    m_param["cid"] = "-";
+
+    //compose_form(form, images, tsBuf, nonce, signature, m_uid);
+    compose_form(form, images, m_param);
 
     opc = sendRequest(curl, form, secretId, result, statusCode);
 
@@ -585,6 +594,44 @@ void compose_form(curl_mime *form, const vector<TImage> & images,
         field = curl_mime_addpart(form);
         curl_mime_name(field, "uid");
         curl_mime_data(field, uid.c_str(), CURL_ZERO_TERMINATED);
+    }
+
+    unsigned int i = 0;
+    do {
+        const TImage & img = images[i];
+
+        if (!img.path().empty()) {
+            field = curl_mime_addpart(form);
+            curl_mime_name(field, "image");
+            curl_mime_filedata(field, img.path().c_str());
+        }
+        else if (!img.url().empty()) {
+            field = curl_mime_addpart(form);
+            curl_mime_name(field, "image");
+            curl_mime_data(field, img.url().c_str(), CURL_ZERO_TERMINATED);
+        }
+        else if (img.buffer()) {
+            field = curl_mime_addpart(form);
+            curl_mime_name(field, "image");
+            curl_mime_filename(field, img.filename().c_str());
+            curl_mime_data(field, (const char *)img.buffer(), (curl_off_t)img.bufferLength());
+        }
+
+        if (!img.tag().empty()){
+            field = curl_mime_addpart(form);
+            curl_mime_name(field, "tag");
+            curl_mime_data(field, img.tag().c_str(), CURL_ZERO_TERMINATED);
+        }
+    } while (++i < images.size());
+}
+
+static void compose_form(curl_mime *form, const vector<TImage> & images, std::map<std::string, std::string> params){
+    curl_mimepart *field = NULL;
+
+    for (auto p : params){
+        field = curl_mime_addpart(form);
+        curl_mime_name(field, p.first.c_str());
+        curl_mime_data(field, p.second.c_str(), CURL_ZERO_TERMINATED);
     }
 
     unsigned int i = 0;
