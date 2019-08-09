@@ -199,10 +199,11 @@ int Recognition::performWithPath(const string & secretId, string & result, long 
     return perform(secretId, imgList, result, statusCode);
 }
 
-
-int Recognition::perform(const string & secretId, const vector<TImage> & images,
-    string & result, long *statusCode)
-{
+int Recognition::perform(time_t ts,
+                         const std::string &secretId,
+                         const std::vector<TUPU::TImage> &images,
+                         std::string &result,
+                         long *statusCode) {
     if (secretId.size() <=0 || images.size() <= 0)
         return OPC_WRONGPARAM;
 
@@ -210,7 +211,6 @@ int Recognition::perform(const string & secretId, const vector<TImage> & images,
     char nonce[HEX_LEN];
     random_str(RND_LEN, nonce);
 
-    time_t ts = time(NULL);
     char tsBuf[30];
     sprintf(tsBuf, "%ld", ts);
 
@@ -227,16 +227,16 @@ int Recognition::perform(const string & secretId, const vector<TImage> & images,
     }
 
     CURL *curl = curl_easy_init();
-	if (NULL == curl){
-		cout <<"curl_easy_init() failed!" <<endl;
-		return OPC_OTHERS;
-	}
-	
+    if (NULL == curl){
+        cout <<"curl_easy_init() failed!" <<endl;
+        return OPC_OTHERS;
+    }
+
     curl_mime *form = curl_mime_init(curl);
-	if (NULL == form){
-		cout <<"curl_mime_init() failed!" <<endl;
-		return OPC_OTHERS;
-	}
+    if (NULL == form){
+        cout <<"curl_mime_init() failed!" <<endl;
+        return OPC_OTHERS;
+    }
 
     m_param["timestamp"] = std::string(tsBuf);
     m_param["nonce"] = std::string(nonce);
@@ -254,6 +254,14 @@ int Recognition::perform(const string & secretId, const vector<TImage> & images,
     curl_easy_cleanup(curl);
 
     return opc;
+}
+
+
+int Recognition::perform(const string & secretId, const vector<TImage> & images,
+    string & result, long *statusCode)
+{
+    time_t ts = time(NULL);
+    return perform(ts, secretId, images, result, statusCode);
 }
 
 
