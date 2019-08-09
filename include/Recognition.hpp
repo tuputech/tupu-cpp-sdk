@@ -54,6 +54,9 @@ class Recognition
         int perform(const std::string & secretId, const std::vector<TImage> & images,
             std::string & result, long *statusCode);
 
+    int perform(time_t ts, const std::string & secretId, const std::vector<TImage> & images,
+                std::string & result, long *statusCode);
+
     private:
         void generalInit(const std::string & rsaPrivateKeyPath);
 
