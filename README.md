@@ -5,6 +5,10 @@ SDK for TUPU visual recognition service
 <https://www.tuputech.com>
 
 ## Changelogs
+
+### v1.4.1 
+- support file timestamp.
+
 ### v1.4
 - CMake Errors fixed
 - update to support MIME API, and `curl_formadd` API is deprecated
