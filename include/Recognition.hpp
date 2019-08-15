@@ -9,6 +9,7 @@
 
 #include "curl/curl.h"
 #include <map>
+#include <memory>
 #include <iostream>
 #include <string>
 #include <iomanip>
@@ -51,10 +52,7 @@ class Recognition
             const std::vector<std::string> & tags = std::vector<std::string>() );
 
         //Don't mix the use of URL and path/binary
-        int perform(const std::string & secretId, const std::vector<TImage> & images,
-            std::string & result, long *statusCode);
-
-    int perform(time_t ts, const std::string & secretId, const std::vector<TImage> & images,
+        int perform(const std::string & secretId, const std::vector<std::shared_ptr<TImage>> & images,
                 std::string & result, long *statusCode);
 
     private:
