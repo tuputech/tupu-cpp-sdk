@@ -20,7 +20,7 @@
 using namespace std;
 using namespace TUPU;
 
-void loadImage(vector<TImage> & images, const char * path, const char * tag = NULL);
+void loadImage(vector<shared_ptr<TImage>> & images, const char * path, const char * tag = NULL);
 void printResult(int rc, long statusCode, const string & result, long start);
 long getTime();
 
@@ -56,11 +56,11 @@ int main(int argc, char *argv[]) {
 
     start = getTime();
     //Providing image binary and path
-    vector<TImage> images3;
+    vector<shared_ptr<TImage>> images3;
     loadImage(images3, imgPath2.c_str(), "Room102");
-    TImage timg;
-    timg.setPath(imgPath1);
-    timg.setTag("Room103");
+    shared_ptr<TImage> timg = std::make_shared<TImage>();
+    timg->setPath(imgPath1);
+    timg->setTag("Room103");
     images3.push_back(timg);
     rc = rec->perform(secretId, images3, result, &statusCode);
     printResult(rc, statusCode, result, start);
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 }
 
 
-void loadImage(vector<TImage> & images, const char * path, const char * tag)
+void loadImage(vector<shared_ptr<TImage>> & images, const char * path, const char * tag)
 {
     ifstream f;
     f.open(path, ios::binary);
@@ -85,10 +85,10 @@ void loadImage(vector<TImage> & images, const char * path, const char * tag)
         const char *fn = strrchr(path, '/');
         fn = (fn == NULL) ? path : fn+1;
 
-        TImage img;
-        img.setBinary(buffer, length, fn);
+        shared_ptr<TImage> img;
+        img->setBinary(buffer, length, fn);
         if (tag != NULL)
-            img.setTag(tag);
+            img->setTag(tag);
         images.push_back(img);
 
         delete buffer;

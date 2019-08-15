@@ -84,6 +84,8 @@ void TImage::setBinary(const void * buf, size_t buf_len, const string & filename
     m_path.clear();
 }
 
-
+void TImage::setTimestamp(uint64_t ts) {
+    m_ts = ts;
+}
 
 } //namespace TUPU

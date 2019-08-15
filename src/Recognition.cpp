@@ -68,10 +68,10 @@ static int verify_with_sha256(const string & message, const string & signature, 
 static void random_str(size_t len, char *output);
 static void parse_json_value(const char *src, size_t len, string & result);
 static size_t write_memory(void *contents, size_t size, size_t nmemb, void *userp);
-static void compose_form(curl_mime *form, const vector<TImage> & images,
+static void compose_form(curl_mime *form, const vector<shared_ptr<TImage>> & images,
     const string & timestamp, const string & nonce,
     const string & signature, const string & uid);
-static void compose_form(curl_mime *form, const vector<TImage> & images, std::map<std::string, std::string> params);
+static void compose_form(curl_mime *form, const vector<shared_ptr<TImage>> & images, std::map<std::string, std::string> params);
 #if VERB_LEV >= 2
 static int debug_trace(CURL *curl, curl_infotype type, char *data, size_t size, void *userptr);
 #endif
@@ -129,9 +129,15 @@ Recognition::Recognition(const string & rsaPrivateKeyPath, const string & apiUrl
 Recognition::~Recognition()
 {
     //RSA_free(m_rsaPrivateKey);
-    RSA_free(m_tupuPublicKey);
+    if (NULL != m_tupuPublicKey) {
+        RSA_free(m_tupuPublicKey);
+        m_tupuPublicKey = NULL;
+    }
 
-    free(m_priKeyBuf);
+    if (NULL != m_priKeyBuf) {
+        free(m_priKeyBuf);
+        m_priKeyBuf = NULL;
+    }
 
     curl_global_cleanup();
 }
@@ -152,19 +158,19 @@ void Recognition::generalInit(const string & rsaPrivateKeyPath)
 int Recognition::performWithURL(const string & secretId, string & result, long *statusCode,
     const vector<string> & images, const vector<string> & tags)
 {
-    vector<TImage> imgList;
+    vector<shared_ptr<TImage>> imgList;
 
     unsigned int i = 0;
     const char * tag = NULL;
     while (i < images.size())
     {
-        TImage image;
-        image.setURL(images[i]);
+        shared_ptr<TImage> image = std::make_shared<TImage>();
+        image->setURL(images[i]);
 
         if (i < tags.size() && !tags[i].empty())
             tag = tags[i].c_str();
         if (tag)
-            image.setTag(tag);
+            image->setTag(tag);
 
         imgList.push_back(image);
 
@@ -177,19 +183,19 @@ int Recognition::performWithURL(const string & secretId, string & result, long *
 int Recognition::performWithPath(const string & secretId, string & result, long *statusCode,
     const vector<string> & images, const vector<string> & tags)
 {
-    vector<TImage> imgList;
+    vector<shared_ptr<TUPU::TImage>> imgList;
 
     unsigned int i = 0;
     const char * tag = NULL;
     while (i < images.size())
     {
-        TImage image;
-        image.setPath(images[i]);
+        std::shared_ptr<TUPU::TImage> image;
+        image->setPath(images[i]);
 
         if (i < tags.size() && !tags[i].empty())
             tag = tags[i].c_str();
         if (tag)
-            image.setTag(tag);
+            image->setTag(tag);
 
         imgList.push_back(image);
 
@@ -199,9 +205,8 @@ int Recognition::performWithPath(const string & secretId, string & result, long 
     return perform(secretId, imgList, result, statusCode);
 }
 
-int Recognition::perform(time_t ts,
-                         const std::string &secretId,
-                         const std::vector<TUPU::TImage> &images,
+int Recognition::perform(const std::string &secretId,
+                         const std::vector<std::shared_ptr<TUPU::TImage>> &images,
                          std::string &result,
                          long *statusCode) {
     if (secretId.size() <=0 || images.size() <= 0)
@@ -209,10 +214,11 @@ int Recognition::perform(time_t ts,
 
     int opc = OPC_OK;
     char nonce[HEX_LEN];
+    time_t req_ts = time(NULL);
     random_str(RND_LEN, nonce);
 
     char tsBuf[30];
-    sprintf(tsBuf, "%ld", ts);
+    sprintf(tsBuf, "%ld", req_ts);
 
 
     stringstream s;
@@ -255,15 +261,6 @@ int Recognition::perform(time_t ts,
 
     return opc;
 }
-
-
-int Recognition::perform(const string & secretId, const vector<TImage> & images,
-    string & result, long *statusCode)
-{
-    time_t ts = time(NULL);
-    return perform(ts, secretId, images, result, statusCode);
-}
-
 
 int Recognition::sendRequest(CURL *curl, curl_mime *form, const string & secretId,
     string & result, long *statusCode)
@@ -341,6 +338,7 @@ int Recognition::handleResponse(const char * resp, size_t resp_len, string & res
         fprintf(errStream, "Failed to parse JSON in response: %d\n", r);
         return OPC_PARSEFAILED;
     }
+//    printf("[%s#%d]resp:%s, len:%ld\n", __func__, __LINE__, resp, resp_len);
 
     string signature, json;
 
@@ -579,7 +577,7 @@ size_t write_memory(void *contents, size_t size, size_t nmemb, void *userp)
 //    const string & timestamp, const string & nonce,
 //    const string & signature, const string & uid)
 static
-void compose_form(curl_mime *form, const vector<TImage> & images,
+void compose_form(curl_mime *form, const vector<shared_ptr<TImage>> & images,
                      const string & timestamp, const string & nonce,
                      const string & signature, const string & uid)
 {
@@ -605,37 +603,38 @@ void compose_form(curl_mime *form, const vector<TImage> & images,
 
     unsigned int i = 0;
     do {
-        const TImage & img = images[i];
+        const shared_ptr<TImage> & img = images[i];
 
-        if (!img.path().empty()) {
+        if (!img->path().empty()) {
             field = curl_mime_addpart(form);
             curl_mime_name(field, "image");
-            curl_mime_filedata(field, img.path().c_str());
+            curl_mime_filedata(field, img->path().c_str());
         }
-        else if (!img.url().empty()) {
+        else if (!img->url().empty()) {
             field = curl_mime_addpart(form);
             curl_mime_name(field, "image");
-            curl_mime_data(field, img.url().c_str(), CURL_ZERO_TERMINATED);
+            curl_mime_data(field, img->url().c_str(), CURL_ZERO_TERMINATED);
         }
-        else if (img.buffer()) {
+        else if (img->buffer()) {
             field = curl_mime_addpart(form);
             curl_mime_name(field, "image");
-            curl_mime_filename(field, img.filename().c_str());
-            curl_mime_data(field, (const char *)img.buffer(), (curl_off_t)img.bufferLength());
+            curl_mime_filename(field, img->filename().c_str());
+            curl_mime_data(field, (const char *)img->buffer(), (curl_off_t)img->bufferLength());
         }
 
-        if (!img.tag().empty()){
+        if (!img->tag().empty()){
             field = curl_mime_addpart(form);
             curl_mime_name(field, "tag");
-            curl_mime_data(field, img.tag().c_str(), CURL_ZERO_TERMINATED);
+            curl_mime_data(field, img->tag().c_str(), CURL_ZERO_TERMINATED);
         }
     } while (++i < images.size());
 }
 
-static void compose_form(curl_mime *form, const vector<TImage> & images, std::map<std::string, std::string> params){
+static void compose_form(curl_mime *form, const vector<shared_ptr<TImage>> & images, std::map<std::string, std::string> params){
     curl_mimepart *field = NULL;
 
     for (auto p : params){
+//        fprintf(stdout, "[%s#%d]%s:%s\n", __func__, __LINE__, p.first.c_str(), p.second.c_str());
         field = curl_mime_addpart(form);
         curl_mime_name(field, p.first.c_str());
         curl_mime_data(field, p.second.c_str(), CURL_ZERO_TERMINATED);
@@ -643,29 +642,42 @@ static void compose_form(curl_mime *form, const vector<TImage> & images, std::ma
 
     unsigned int i = 0;
     do {
-        const TImage & img = images[i];
+        const shared_ptr<TImage> img = images[i];
 
-        if (!img.path().empty()) {
+        if (!img->path().empty()) {
             field = curl_mime_addpart(form);
             curl_mime_name(field, "image");
-            curl_mime_filedata(field, img.path().c_str());
+            curl_mime_filedata(field, img->path().c_str());
+//            fprintf(stdout, "[%s#%d]fpath:%s\n", __func__, __LINE__, img->path().c_str());
         }
-        else if (!img.url().empty()) {
+        else if (!img->url().empty()) {
             field = curl_mime_addpart(form);
             curl_mime_name(field, "image");
-            curl_mime_data(field, img.url().c_str(), CURL_ZERO_TERMINATED);
+            curl_mime_data(field, img->url().c_str(), CURL_ZERO_TERMINATED);
+//            fprintf(stdout, "[%s#%d]furl:%s\n", __func__, __LINE__, img->url().c_str());
         }
-        else if (img.buffer()) {
+        else if (img->buffer()) {
             field = curl_mime_addpart(form);
             curl_mime_name(field, "image");
-            curl_mime_filename(field, img.filename().c_str());
-            curl_mime_data(field, (const char *)img.buffer(), (curl_off_t)img.bufferLength());
+            curl_mime_filename(field, img->filename().c_str());
+            curl_mime_data(field, (const char *)img->buffer(), (curl_off_t)img->bufferLength());
+//            fprintf(stdout, "[%s#%d]fname:%s\n", __func__, __LINE__, img->filename().c_str());
         }
 
-        if (!img.tag().empty()){
+        if (!img->tag().empty()){
             field = curl_mime_addpart(form);
             curl_mime_name(field, "tag");
-            curl_mime_data(field, img.tag().c_str(), CURL_ZERO_TERMINATED);
+            curl_mime_data(field, img->tag().c_str(), CURL_ZERO_TERMINATED);
+//            fprintf(stdout, "[%s#%d]tag:%s\n", __func__, __LINE__, img->tag().c_str());
+        }
+
+        if (!img->time().empty()) {
+            field = curl_mime_addpart(form);
+            curl_mime_name(field, "time");
+            curl_mime_data(field, img->time().c_str(), CURL_ZERO_TERMINATED);
+//            fprintf(stdout, "[%s#%d]time:%s\n", __func__, __LINE__, img->time().c_str());
+        } else {
+//            fprintf(stdout, "[%s#%d]empty time!\n", __func__, __LINE__);
         }
     } while (++i < images.size());
 }

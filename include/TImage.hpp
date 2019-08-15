@@ -29,6 +29,8 @@ class TImage
         //Set tag of image to classify images in recognition result 
         void setTag(const std::string & tag) { m_tag = tag; }
 
+        void setTimestamp(uint64_t ts);
+
     public:
         const std::string & url() const { return m_url; }
         const std::string & path() const { return m_path; }
@@ -36,11 +38,13 @@ class TImage
         size_t bufferLength() const { return m_len; }
         const std::string & filename() const { return m_filename; }
         const std::string & tag() const { return m_tag; }
+        const std::string time() const { return std::to_string(m_ts); }
 
     private:
         std::string m_url;
         std::string m_path;
         std::string m_tag;
+        uint64_t m_ts;
         void * m_buffer;
         size_t m_len;
         std::string m_filename;
