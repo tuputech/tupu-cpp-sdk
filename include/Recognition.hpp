@@ -39,8 +39,8 @@ class Recognition
         void setParameter(std::map<std::string, std::string> param) {m_param = param;}
 
         void setCid(std::string value) {m_param["CID"] = value;}
-
-        std::string getCid() { return m_param["CID"]; }
+  
+        std::string getCid() { return (m_param.end() == m_param.find("CID")) ? std::string("") : m_param["CID"]; }
 
     public:
         int performWithURL(const std::string & secretId,
