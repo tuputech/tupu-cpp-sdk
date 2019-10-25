@@ -40,6 +40,8 @@ class Recognition
 
         void setCid(std::string value) {m_param["CID"] = value;}
 
+        std::string getCid() { return m_param["CID"]; }
+
     public:
         int performWithURL(const std::string & secretId,
             std::string & result, long *statusCode,
