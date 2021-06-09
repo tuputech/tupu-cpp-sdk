@@ -17,6 +17,17 @@
 namespace TUPU
 {
 
+enum {
+    OPC_OK = 0,
+    OPC_WRONGPARAM = -1, //Wrong parameter(s)
+    OPC_SIGNFAILED = -2, //Failed to sign request
+    OPC_SENDFAILED = -3, //Failed to send request
+    OPC_REQFAILED = -4, //Request failed
+    OPC_PARSEFAILED = -5, //Failed to parse response data
+    OPC_VERIFYFAILED = -6, //Failed to verify response signature
+    OPC_OTHERS = -10
+};
+
 class TImage;
 typedef struct rsa_st RSA;
 
@@ -32,7 +43,16 @@ class Recognition
 
     public:
         //Set uid post paremeter to identify sub-users
-        void setUID(const std::string & uid) { m_uid = uid; }
+        int setUID(const std::string & uid) {
+            if (uid == "") {
+                fprintf(stderr, "UID is not allowed to be an empty string\n");
+                return OPC_WRONGPARAM;
+            }
+
+            m_param["uid"] = uid;
+
+            return 0;
+        }
         //Set user-agent of request(s)
         void setUserAgent(const std::string & ua) { m_ua = ua; }
 
@@ -68,7 +88,6 @@ class Recognition
         //RSA * m_rsaPrivateKey;
         RSA * m_tupuPublicKey;
         std::string m_apiUrl;
-        std::string m_uid;
         std::string m_ua;
         std::map<std::string, std::string> m_param;
         char * m_priKeyBuf;

@@ -10,8 +10,11 @@ test/test-sample.cpp
 
 test/test-local.cpp
 
-test2/
+test/testApp
 
+test/*.pem
+
+test2/
 
 cmake-build-debug
 
@@ -24,4 +27,3 @@ cmake-build-debug
 CMakeCache.txt
 
 lib/
-
