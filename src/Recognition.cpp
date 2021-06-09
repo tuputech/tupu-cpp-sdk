@@ -43,17 +43,6 @@ using namespace std;
 namespace TUPU
 {
 
-enum {
-    OPC_OK = 0,
-    OPC_WRONGPARAM = -1, //Wrong parameter(s)
-    OPC_SIGNFAILED = -2, //Failed to sign request
-    OPC_SENDFAILED = -3, //Failed to send request
-    OPC_REQFAILED = -4, //Request failed
-    OPC_PARSEFAILED = -5, //Failed to parse response data
-    OPC_VERIFYFAILED = -6, //Failed to verify response signature
-    OPC_OTHERS = -10
-};
-
 typedef struct {
   char *memory;
   size_t size;
@@ -247,9 +236,7 @@ int Recognition::perform(const std::string &secretId,
     m_param["timestamp"] = std::string(tsBuf);
     m_param["nonce"] = std::string(nonce);
     m_param["signature"] =  std::string(signature);
-    m_param["uid"] = m_uid;
 
-    //compose_form(form, images, tsBuf, nonce, signature, m_uid);
     compose_form(form, images, m_param);
 
     opc = sendRequest(curl, form, secretId, result, statusCode);
@@ -329,7 +316,7 @@ int Recognition::sendRequest(CURL *curl, curl_mime *form, const string & secretI
 int Recognition::handleResponse(const char * resp, size_t resp_len, string & result)
 {
     jsmn_parser parser;
-#define TK_LEN 10
+    #define TK_LEN 10
     jsmntok_t tokens[TK_LEN];
 
     jsmn_init(&parser);

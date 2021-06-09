@@ -30,40 +30,48 @@ int main(int argc, char *argv[]) {
     Recognition *rec = new Recognition("Path-of-Your-PKCS8-Private-Key");
 
     //Set sub-user identifier for billing and statistics (optional feature)
-    //rec->setUID("user-bucket-xyz");
-
-    string imgUrl = "http://www.yourdomain.com/img/1.jpg";
-    string imgPath1 = "/home/user/img/1.jpg";
-    string imgPath2 = "/home/user/img/2.jpg";
-
-    vector<string> images1 = { imgUrl };
-    vector<string> images2 = { imgPath1, imgPath2 };
-    vector<string> tags = {"Funny"}; //number of tags may be less than number of images
+    // int rs = rec->setUID("user-bucket-xyz");
+    // if (rs != 0) {
+    //     return rs;
+    // }
 
     string result;
     long statusCode = 0;
     int rc = 0;
-
+    vector<string> tags = {"Funny"}; //number of tags may be less than number of images
     long start = getTime();
+
+    /*********** imageUrl *****************/
     //Providing URLs of images with tags (optional)
+    string imgUrl = "http://www.yourdomain.com/img/1.jpg";
+    vector<string> images1 = { imgUrl };
     rc = rec->performWithURL(secretId, result, &statusCode, images1, tags);
     printResult(rc, statusCode, result, start);
+    /*************************************/
 
+    /*********** imagePath *****************/
+    string imgPath1 = "/home/user/img/1.jpg";
+    string imgPath2 = "/home/user/img/2.jpg";
+    vector<string> images2 = { imgPath1, imgPath2 };
     start = getTime();
     //Providing paths of images without tags (optional)
     rc = rec->performWithPath(secretId, result, &statusCode, images2);
     printResult(rc, statusCode, result, start);
+    /*************************************/
 
+    /*********** imageContent *****************/
     start = getTime();
-    //Providing image binary and path
+    // Providing image binary and path
+    string imgPath3 = "/home/user/img/2.jpg";
     vector<shared_ptr<TImage>> images3;
-    loadImage(images3, imgPath2.c_str(), "Room102");
+    loadImage(images3, imgPath3.c_str(), "Room102");
     shared_ptr<TImage> timg = std::make_shared<TImage>();
-    timg->setPath(imgPath1);
+    timg->setPath(imgPath3);
     timg->setTag("Room103");
     images3.push_back(timg);
     rc = rec->perform(secretId, images3, result, &statusCode);
     printResult(rc, statusCode, result, start);
+    /*************************************/
 
     delete rec;
 
