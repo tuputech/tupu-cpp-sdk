@@ -5,7 +5,8 @@ SDK for TUPU visual recognition service
 <https://www.tuputech.com>
 
 ## Changelogs
-
+### v1.4.2
+- Fixed bug for empty string of uid.
 ### v1.4.1 
 - support file timestamp.
 
@@ -67,6 +68,7 @@ SDK for TUPU visual recognition service
     $ cmake .
     $ make
 ```
+And then you can use the testApp in the test.
 
 #### Output
 
