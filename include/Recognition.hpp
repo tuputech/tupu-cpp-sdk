@@ -74,6 +74,11 @@ class Recognition
             const std::vector<std::string> & tags = std::vector<std::string>(),
             const std::vector<std::string> & sequenceIds = std::vector<std::string>() );
 
+        int performWithPath(const std::string & secretId,
+            std::string & result, long *statusCode,
+            const std::vector<std::string> & imagePaths,
+            const std::vector<std::string> & tags = std::vector<std::string>() );
+
         int performWithPathSequence(const std::string & secretId,
             std::string & result, long *statusCode,
             const std::vector<std::string> & imagePaths,
