@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
     long statusCode = 0;
     int rc = 0;
     vector<string> tags = {"Funny"}; //number of tags may be less than number of images
+    vector<string> sequenceIds = {"SequenceA"}; //number of sequenceIds may be less than number of images
     long start = getTime();
 
     /*********** imageUrl *****************/
@@ -46,6 +47,12 @@ int main(int argc, char *argv[]) {
     string imgUrl = "http://www.yourdomain.com/img/1.jpg";
     vector<string> images1 = { imgUrl };
     rc = rec->performWithURL(secretId, result, &statusCode, images1, tags);
+    printResult(rc, statusCode, result, start);
+
+    //Providing URLs of images with tags & sequenceIds (optional)
+    string imgUrl = "http://www.yourdomain.com/img/1.jpg";
+    vector<string> images1 = { imgUrl };
+    rc = rec->performWithURLSequence(secretId, result, &statusCode, images1, tags, sequenceIds);
     printResult(rc, statusCode, result, start);
     /*************************************/
 

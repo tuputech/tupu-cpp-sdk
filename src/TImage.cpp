@@ -28,6 +28,7 @@ TImage::TImage(const TImage & img)
     , m_len(0)
 {
     m_tag = img.m_tag;
+    m_sequenceId = img.m_sequenceId;
     if (img.m_buffer) {
         setBinary(img.m_buffer, img.m_len, img.m_filename);
     } else {
@@ -44,6 +45,7 @@ TImage::~TImage()
 TImage & TImage::operator=(const TImage & img)
 {
     m_tag = img.m_tag;
+    m_sequenceId = img.m_sequenceId;
     if (img.m_buffer) {
         setBinary(img.m_buffer, img.m_len, img.m_filename);
     } else {

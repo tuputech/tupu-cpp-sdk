@@ -169,6 +169,37 @@ int Recognition::performWithURL(const string & secretId, string & result, long *
     return perform(secretId, imgList, result, statusCode);
 }
 
+int Recognition::performWithURLSequence(const string & secretId, string & result, long *statusCode,
+    const vector<string> & images, const vector<string> & tags, const vector<string> & sequenceIds)
+{
+    vector<shared_ptr<TImage>> imgList;
+
+    unsigned int i = 0;
+    const char * tag = NULL;
+    const char * sequenceId = NULL;
+    while (i < images.size())
+    {
+        shared_ptr<TImage> image = std::make_shared<TImage>();
+        image->setURL(images[i]);
+
+        if (i < tags.size() && !tags[i].empty())
+            tag = tags[i].c_str();
+        if (tag)
+            image->setTag(tag);
+
+        if (i < sequenceIds.size() && !sequenceIds[i].empty())
+            sequenceId = sequenceIds[i].c_str();
+        if (sequenceId)
+            image->setSequenceId(sequenceId);
+
+        imgList.push_back(image);
+
+        i++;
+    }
+
+    return perform(secretId, imgList, result, statusCode);
+}
+
 int Recognition::performWithPath(const string & secretId, string & result, long *statusCode,
     const vector<string> & images, const vector<string> & tags)
 {
@@ -185,6 +216,37 @@ int Recognition::performWithPath(const string & secretId, string & result, long 
             tag = tags[i].c_str();
         if (tag)
             image->setTag(tag);
+
+        imgList.push_back(image);
+
+        i++;
+    }
+
+    return perform(secretId, imgList, result, statusCode);
+}
+
+int Recognition::performWithPathSequence(const string & secretId, string & result, long *statusCode,
+    const vector<string> & images, const vector<string> & tags, const vector<string> & sequenceIds)
+{
+    vector<shared_ptr<TUPU::TImage>> imgList;
+
+    unsigned int i = 0;
+    const char * tag = NULL;
+    const char * sequenceId = NULL;
+    while (i < images.size())
+    {
+        std::shared_ptr<TUPU::TImage> image;
+        image->setPath(images[i]);
+
+        if (i < tags.size() && !tags[i].empty())
+            tag = tags[i].c_str();
+        if (tag)
+            image->setTag(tag);
+
+        if (i < sequenceIds.size() && !sequenceIds[i].empty())
+            sequenceId = sequenceIds[i].c_str();
+        if (sequenceId)
+            image->setSequenceId(sequenceId);
 
         imgList.push_back(image);
 
@@ -614,10 +676,16 @@ void compose_form(curl_mime *form, const vector<shared_ptr<TImage>> & images,
             curl_mime_name(field, "tag");
             curl_mime_data(field, img->tag().c_str(), CURL_ZERO_TERMINATED);
         }
+
+        if (!img->sequenceId().empty()){
+            field = curl_mime_addpart(form);
+            curl_mime_name(field, "sequenceId");
+            curl_mime_data(field, img->sequenceId().c_str(), CURL_ZERO_TERMINATED);
+        }
     } while (++i < images.size());
 }
 
-static void compose_form(curl_mime *form, const vector<shared_ptr<TImage>> & images, std::map<std::string, std::string> params){
+static void compose_form(curl_mime *form, const vector<shared_ptr<TImage>> & images, std::map<std::string, std::string> params) {
     curl_mimepart *field = NULL;
 
     for (auto p : params){
@@ -656,6 +724,13 @@ static void compose_form(curl_mime *form, const vector<shared_ptr<TImage>> & ima
             curl_mime_name(field, "tag");
             curl_mime_data(field, img->tag().c_str(), CURL_ZERO_TERMINATED);
 //            fprintf(stdout, "[%s#%d]tag:%s\n", __func__, __LINE__, img->tag().c_str());
+        }
+
+        if (!img->sequenceId().empty()){
+            field = curl_mime_addpart(form);
+            curl_mime_name(field, "sequenceId");
+            curl_mime_data(field, img->sequenceId().c_str(), CURL_ZERO_TERMINATED);
+//            fprintf(stdout, "[%s#%d]sequenceId:%s\n", __func__, __LINE__, img->sequenceId().c_str());
         }
 
         if (!img->time().empty()) {
