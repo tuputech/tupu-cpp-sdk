@@ -5,6 +5,10 @@ SDK for TUPU visual recognition service
 <https://www.tuputech.com>
 
 ## Changelogs
+### v1.5.0
+- Add support for field sequenceId with image
+- fixed cmake files
+- fixed bugs in Recognition.cpp for initializing shared_ptr TImage
 ### v1.4.2
 - Fixed bug for empty string of uid.
 ### v1.4.1 

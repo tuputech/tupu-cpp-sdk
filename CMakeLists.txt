@@ -8,7 +8,7 @@
 
 cmake_minimum_required (VERSION 3.4)
 
-project (tupu-sdk VERSION 1.1.0 DESCRIPTION "TUPU SDK for image detection")
+project (tupu-sdk VERSION 1.5.0 DESCRIPTION "TUPU SDK for image detection")
 set(debug 0)    #default not print debug info, no debug symbol
 
 if (debug)
