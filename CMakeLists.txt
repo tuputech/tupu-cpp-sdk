@@ -1,14 +1,14 @@
 ###############################################################################
 # TUPU Recognition API SDK
-# Copyright(c)2013-2016, TUPU Technology
+# Copyright(c)2013-2022, TUPU Technology
 # http://www.tuputech.com
 ###############################################################################
 
 
 
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.4)
 
-project (Demo1)
+project (tupu-sdk VERSION 1.1.0 DESCRIPTION "TUPU SDK for image detection")
 set(debug 0)    #default not print debug info, no debug symbol
 
 if (debug)
@@ -24,13 +24,20 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif ()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unused-function -std=c++11")
 
-set(OPENSSL_ROOT_PATH "/usr/local/Cellar/openssl/1.0.2o_2")  # default OPENSSL_ROOT_PATH, need change
-set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_PATH}/include")
+set(OPENSSL_USE_STATIC_LIBS TRUE)
+find_package(OpenSSL REQUIRED)
+find_package(CURL REQUIRED)
 
-find_package(OpenSSL)
-find_package(CURL)
+if (OPENSSL_FOUND)
+    message(STATUS "${OPENSSL_INCLUDE_DIR}")
+    message(STATUS "${OPENSSL_CRYPTO_LIBRARY}")
+    message(STATUS "${OPENSSL_SSL_LIBRARY}")
+    message(STATUS "${OPENSSL_LIBRARIES}")
+    message(STATUS "${OPENSSL_VERSION}")
+endif ()
 
-if (debug AND CURL_FOUND)
+#if (debug AND CURL_FOUND)
+if (CURL_FOUND)
     message(STATUS "${CURL_INCLUDE_DIRS}")
     message(STATUS "${CURL_LIBRARIES}")
     message(STATUS "${CURL_VERSION_STRING}")

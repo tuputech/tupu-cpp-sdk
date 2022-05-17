@@ -1,6 +1,6 @@
 /******************************************************************************
  * TUPU Recognition API SDK
- * Copyright(c)2013-2016, TUPU Technology
+ * Copyright(c)2013-2022, TUPU Technology
  * http://www.tuputech.com
  *****************************************************************************/
 
@@ -145,12 +145,14 @@ void Recognition::generalInit(const string & rsaPrivateKeyPath)
 
 
 int Recognition::performWithURL(const string & secretId, string & result, long *statusCode,
-    const vector<string> & images, const vector<string> & tags)
+    const vector<string> & images, const vector<string> & tags,
+    const std::vector<std::string> & sequenceIds)
 {
     vector<shared_ptr<TImage>> imgList;
 
     unsigned int i = 0;
     const char * tag = NULL;
+    const char * sequenceId = NULL;
     while (i < images.size())
     {
         shared_ptr<TImage> image = std::make_shared<TImage>();
@@ -161,6 +163,11 @@ int Recognition::performWithURL(const string & secretId, string & result, long *
         if (tag)
             image->setTag(tag);
 
+        if (i < sequenceIds.size() && !sequenceIds[i].empty())
+            sequenceId = sequenceIds[i].c_str();
+        if (sequenceId)
+            image->setSequenceId(sequenceId);
+
         imgList.push_back(image);
 
         i++;
@@ -170,21 +177,28 @@ int Recognition::performWithURL(const string & secretId, string & result, long *
 }
 
 int Recognition::performWithPath(const string & secretId, string & result, long *statusCode,
-    const vector<string> & images, const vector<string> & tags)
+    const vector<string> & images, const vector<string> & tags,
+    const std::vector<std::string> & sequenceIds)
 {
-    vector<shared_ptr<TUPU::TImage>> imgList;
+    vector<shared_ptr<TImage>> imgList;
 
     unsigned int i = 0;
     const char * tag = NULL;
+    const char * sequenceId = NULL;
     while (i < images.size())
     {
-        std::shared_ptr<TUPU::TImage> image;
+        shared_ptr<TImage> image = std::make_shared<TImage>();
         image->setPath(images[i]);
 
         if (i < tags.size() && !tags[i].empty())
             tag = tags[i].c_str();
         if (tag)
             image->setTag(tag);
+
+        if (i < sequenceIds.size() && !sequenceIds[i].empty())
+            sequenceId = sequenceIds[i].c_str();
+        if (sequenceId)
+            image->setSequenceId(sequenceId);
 
         imgList.push_back(image);
 
@@ -195,7 +209,7 @@ int Recognition::performWithPath(const string & secretId, string & result, long 
 }
 
 int Recognition::perform(const std::string &secretId,
-                         const std::vector<std::shared_ptr<TUPU::TImage>> &images,
+                         const std::vector<std::shared_ptr<TImage>> &images,
                          std::string &result,
                          long *statusCode) {
     if (secretId.size() <=0 || images.size() <= 0)
@@ -223,13 +237,13 @@ int Recognition::perform(const std::string &secretId,
 
     CURL *curl = curl_easy_init();
     if (NULL == curl){
-        cout <<"curl_easy_init() failed!" <<endl;
+        cout <<"curl_easy_init() failed!" << endl;
         return OPC_OTHERS;
     }
 
     curl_mime *form = curl_mime_init(curl);
     if (NULL == form){
-        cout <<"curl_mime_init() failed!" <<endl;
+        cout <<"curl_mime_init() failed!" << endl;
         return OPC_OTHERS;
     }
 
@@ -284,12 +298,12 @@ int Recognition::sendRequest(CURL *curl, curl_mime *form, const string & secretI
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
 
 #if VERB_LEV >= 1
+    //cout << "calling URL: " << url << endl;
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 #if VERB_LEV >= 2
     curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, debug_trace);
 #endif
 #endif
-
     res = curl_easy_perform(curl);
 
     long httpcode = 0;
@@ -559,10 +573,6 @@ size_t write_memory(void *contents, size_t size, size_t nmemb, void *userp)
     return realsize;
 }
 
-//static
-//void compose_form(struct curl_httppost ** post, const vector<TImage> & images,
-//    const string & timestamp, const string & nonce,
-//    const string & signature, const string & uid)
 static
 void compose_form(curl_mime *form, const vector<shared_ptr<TImage>> & images,
                      const string & timestamp, const string & nonce,
@@ -614,6 +624,18 @@ void compose_form(curl_mime *form, const vector<shared_ptr<TImage>> & images,
             curl_mime_name(field, "tag");
             curl_mime_data(field, img->tag().c_str(), CURL_ZERO_TERMINATED);
         }
+
+        if (!img->sequenceId().empty()){
+            field = curl_mime_addpart(form);
+            curl_mime_name(field, "sequenceId");
+            curl_mime_data(field, img->sequenceId().c_str(), CURL_ZERO_TERMINATED);
+        }
+
+        if (!img->time().empty()) {
+            field = curl_mime_addpart(form);
+            curl_mime_name(field, "time");
+            curl_mime_data(field, img->time().c_str(), CURL_ZERO_TERMINATED);
+        }
     } while (++i < images.size());
 }
 
@@ -621,7 +643,7 @@ static void compose_form(curl_mime *form, const vector<shared_ptr<TImage>> & ima
     curl_mimepart *field = NULL;
 
     for (auto p : params){
-//        fprintf(stdout, "[%s#%d]%s:%s\n", __func__, __LINE__, p.first.c_str(), p.second.c_str());
+        //fprintf(stdout, "[%s#%d]%s:%s\n", __func__, __LINE__, p.first.c_str(), p.second.c_str());
         field = curl_mime_addpart(form);
         curl_mime_name(field, p.first.c_str());
         curl_mime_data(field, p.second.c_str(), CURL_ZERO_TERMINATED);
@@ -635,36 +657,39 @@ static void compose_form(curl_mime *form, const vector<shared_ptr<TImage>> & ima
             field = curl_mime_addpart(form);
             curl_mime_name(field, "image");
             curl_mime_filedata(field, img->path().c_str());
-//            fprintf(stdout, "[%s#%d]fpath:%s\n", __func__, __LINE__, img->path().c_str());
+            //fprintf(stdout, "[%s#%d]fpath:%s\n", __func__, __LINE__, img->path().c_str());
         }
         else if (!img->url().empty()) {
             field = curl_mime_addpart(form);
             curl_mime_name(field, "image");
             curl_mime_data(field, img->url().c_str(), CURL_ZERO_TERMINATED);
-//            fprintf(stdout, "[%s#%d]furl:%s\n", __func__, __LINE__, img->url().c_str());
+            //fprintf(stdout, "[%s#%d]furl:%s\n", __func__, __LINE__, img->url().c_str());
         }
         else if (img->buffer()) {
             field = curl_mime_addpart(form);
             curl_mime_name(field, "image");
             curl_mime_filename(field, img->filename().c_str());
             curl_mime_data(field, (const char *)img->buffer(), (curl_off_t)img->bufferLength());
-//            fprintf(stdout, "[%s#%d]fname:%s\n", __func__, __LINE__, img->filename().c_str());
+            //fprintf(stdout, "[%s#%d]fname:%s\n", __func__, __LINE__, img->filename().c_str());
         }
 
         if (!img->tag().empty()){
             field = curl_mime_addpart(form);
             curl_mime_name(field, "tag");
             curl_mime_data(field, img->tag().c_str(), CURL_ZERO_TERMINATED);
-//            fprintf(stdout, "[%s#%d]tag:%s\n", __func__, __LINE__, img->tag().c_str());
+            //fprintf(stdout, "[%s#%d]tag:%s\n", __func__, __LINE__, img->tag().c_str());
+        }
+
+        if (!img->sequenceId().empty()){
+            field = curl_mime_addpart(form);
+            curl_mime_name(field, "sequenceId");
+            curl_mime_data(field, img->sequenceId().c_str(), CURL_ZERO_TERMINATED);
         }
 
         if (!img->time().empty()) {
             field = curl_mime_addpart(form);
             curl_mime_name(field, "time");
             curl_mime_data(field, img->time().c_str(), CURL_ZERO_TERMINATED);
-//            fprintf(stdout, "[%s#%d]time:%s\n", __func__, __LINE__, img->time().c_str());
-        } else {
-//            fprintf(stdout, "[%s#%d]empty time!\n", __func__, __LINE__);
         }
     } while (++i < images.size());
 }

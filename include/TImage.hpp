@@ -1,6 +1,6 @@
 /******************************************************************************
  * TUPU Recognition API SDK
- * Copyright(c)2013-2016, TUPU Technology
+ * Copyright(c)2013-2022, TUPU Technology
  * http://www.tuputech.com
  *****************************************************************************/
 
@@ -28,6 +28,8 @@ class TImage
         void setBinary(const void * buf, size_t buf_len, const std::string & filename);
         //Set tag of image to classify images in recognition result 
         void setTag(const std::string & tag) { m_tag = tag; }
+        //Set sequence ids
+        void setSequenceId(const std::string & sequenceId) { m_sequenceId = sequenceId; }
 
         void setTimestamp(uint64_t ts);
 
@@ -38,12 +40,14 @@ class TImage
         size_t bufferLength() const { return m_len; }
         const std::string & filename() const { return m_filename; }
         const std::string & tag() const { return m_tag; }
+        const std::string & sequenceId() const { return m_sequenceId; }
         const std::string time() const { return std::to_string(m_ts); }
 
     private:
         std::string m_url;
         std::string m_path;
         std::string m_tag;
+        std::string m_sequenceId;
         uint64_t m_ts;
         void * m_buffer;
         size_t m_len;

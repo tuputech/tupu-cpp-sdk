@@ -66,12 +66,14 @@ class Recognition
         int performWithURL(const std::string & secretId,
             std::string & result, long *statusCode,
             const std::vector<std::string> & imageURLs,
-            const std::vector<std::string> & tags = std::vector<std::string>() );
+            const std::vector<std::string> & tags = std::vector<std::string>(),
+            const std::vector<std::string> & sequenceIds = std::vector<std::string>() );
 
         int performWithPath(const std::string & secretId,
             std::string & result, long *statusCode,
             const std::vector<std::string> & imagePaths,
-            const std::vector<std::string> & tags = std::vector<std::string>() );
+            const std::vector<std::string> & tags = std::vector<std::string>(),
+            const std::vector<std::string> & sequenceIds = std::vector<std::string>() );
 
         //Don't mix the use of URL and path/binary
         int perform(const std::string & secretId, const std::vector<std::shared_ptr<TImage>> & images,
